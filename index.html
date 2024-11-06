@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-NWZWKP5H");
+    </script>
+    <!-- End Google Tag Manager -->
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-NWZWKP5H"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div id="app">
+      <div class="articles-container single">
+        <div class="wrapper"></div>
+      </div>
+      <div class="article-grid-title">
+        <h3 style="text-align: center"></h3>
+      </div>
+      <div class="articles-container grid related-articles">
+        <div class="wrapper"></div>
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const articleConfig = {
+          vertical: "insurance",
+          subvertical: "auto-insurance",
+          articleType: "article",
+          apiUrl:
+            "https://us-west-2.cdn.hygraph.com/content/ckwzg7tk528a001z4e7z0bqi0/master",
+          domain: "free-insurance-quotes.us",
+        };
+        initializeArticles(articleConfig);
+      });
+    </script>
+  </body>
+</html>

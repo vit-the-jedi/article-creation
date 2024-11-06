@@ -1,0 +1,91 @@
+@charset "UTF-8";
+
+/*articles*/
+.articles-container {
+  max-width: 700px;
+  margin: auto;
+  width: 100%;
+}
+.article h1, .article h2 {
+  margin: 25px 0;
+}
+.article h3, .article h4, .article h5, .article h6 {
+  margin: 15px 0;
+}
+.article .article-title {
+  font-weight: bold;
+  font-size: 2.5rem;
+}
+.article .article-cover-img {
+  margin-bottom: 25px;
+}
+.article-cover-img {
+  border-radius: 5px;
+}
+.article-grid div:has(.isEmpty) {
+  display: none;
+}
+.article-grid {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-rows: repeat(auto, 50px);
+  margin-top: 50px;
+}
+.related-articles .article-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.article-card {
+  background-color: white;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 150%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.article-grid .article-card .article-title {
+  font-size: 1.5rem;
+  padding: 10px 0;
+}
+.article-grid .article-card .article-excerpt {
+  font-size: 1rem;
+  display: block;
+}
+.related-articles-container {
+  margin: 100px 0;
+}
+.articles-container .back-btn {
+  margin: auto;
+  display:block;
+  background: none;
+  border: none;
+  max-width: 200px;
+  width: 60%;
+  color: var(--mainColor);
+  text-decoration: underline;
+  cursor: pointer;
+}
+/*
+.article-page .row {
+  display: flex;
+}
+.related-articles-container, #builder .related-articles-container.fixed {
+position: relative;
+}
+.related-articles .article-card {
+width: 205px;
+}
+.related-articles-container.fixed {
+position: fixed;
+right: 50px;
+}
+.article-page .intersection {
+height: 1px;
+width: 100%;
+background: red;
+}*/
