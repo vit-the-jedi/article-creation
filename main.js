@@ -37,7 +37,6 @@ export const createArticleHandler = async (articleConfig, slug) => {
   const articleInstance = new Article(articleConfig);
   await articleInstance.build(slug);
   articleRefs.storeInstance(Article, articleInstance);
-  articleInstance.createConversionTracker();
   const relatedArticles =
     articleRefs.getInstance(Article).article.relatedArticles;
   if (relatedArticles.length > 0) {

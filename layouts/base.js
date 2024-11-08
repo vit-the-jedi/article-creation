@@ -12,9 +12,6 @@ export class ArticleController {
     this.hostname = config.domain;
     this.gaId = config.gaId;
     this.analytics = {
-      init: () => {
-        window.dataLayer = window.dataLayer || [];
-      },
       events: {
         view: (title) => {
           window.dataLayer.push({
@@ -28,18 +25,22 @@ export class ArticleController {
             articleTitle: title,
           });
         }
+      },
+      createConversionTracker: () => {
+        const links = document.querySelectorAll(`a[href*="${this.hostname}"]`);
+        links.forEach(link => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            this.analytics.events.conversion(this.article.title);
+            window.location.href = event.target.href;
+          });
+        });
+      },
+      init: () => {
+        window.dataLayer = window.dataLayer || [];
+        this.analytics.createConversionTracker();
       }
     }
-  }
-  createConversionTracker = () => {
-    const links = document.querySelectorAll(`a[href*="${this.hostname}"]`);
-    links.forEach(link => {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-        this.analytics.events.conversion(this.article.title);
-        window.location.href = event.target.href;
-      });
-    });
   }
   async fetchHandler(query) {
     const resp = await fetch(this.apiUrl, {
