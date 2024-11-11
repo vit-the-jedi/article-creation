@@ -2,7 +2,7 @@
 
 import { ArticleController } from "./base.js";
 import { Article } from "./article-single.js";
-import { destroyArticle, articleRefs, scrollToHeader, createNode } from "../main.js";
+import { destroyArticle, articleRefs, scrollToHeader, createNode, createDate } from "../main.js";
 
 export class ArticleGrid extends ArticleController {
   constructor(config, data) {
@@ -38,6 +38,8 @@ export class ArticleGrid extends ArticleController {
       excerpt.textContent = this.trimExcerpt(articleObj.excerpt);
       const title = createNode("h2", { class: "article-title" });
       title.textContent = articleObj.title;
+      const publishedDate = createNode("p", { class: "article-date article-metadata" });
+      publishedDate.textContent = createDate(articleObj.publishedAt ?? articleObj.date);
       const image = createNode("img", {
         class: "article-cover-img",
         style: "max-width:100%;width:100%;display:block",
@@ -55,6 +57,7 @@ export class ArticleGrid extends ArticleController {
       articleContainer.classList.add("article-grid");
       articleLink.appendChild(image);
       articleLink.appendChild(title);
+      articleLink.appendChild(publishedDate);
       articleLink.appendChild(excerpt);
       articleContent.appendChild(articleLink);
       articleContainer.append(articleContent);
@@ -71,6 +74,7 @@ export class ArticleGrid extends ArticleController {
                         articles(
                           stage: DRAFT
                           first: 20
+                          orderBy: date_ASC
                           where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}}
                         ) {
                           id

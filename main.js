@@ -138,6 +138,11 @@ const removeLoader = () => {
   document.querySelector(".loader").remove();
 }
 
+export const createDate = (hygraphDate) => {
+  const date = new Date(hygraphDate);
+  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+}
+
 window.initializeArticles = async (config) => {
   //SETLOADIN(TRUE)
   //user navigating to specific article page

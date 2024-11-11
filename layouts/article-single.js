@@ -1,7 +1,7 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import { createNode } from "../main.js";
+import { createNode, createDate } from "../main.js";
 
 export class Article extends ArticleController {
   constructor(config){
@@ -29,7 +29,7 @@ export class Article extends ArticleController {
       const date = createNode("p", {
         class: "article-date article-metadata",
       });
-      date.textContent = articleObj.date;
+      date.textContent = createDate(articleObj.date);
       const articleContent = createNode("div", {
         class: "article",
         id: articleObj.id,
@@ -53,6 +53,7 @@ export class Article extends ArticleController {
     this.query = `query GetArticleBySlug{
                         articles(
                           stage: DRAFT
+                          orderBy: publishedAt_DESC
                           where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, urlSlug: "${this.urlSlug}", domain: ${this.domain}}
                         ) {
                           id
@@ -83,8 +84,8 @@ export class Article extends ArticleController {
         articles(
           stage: DRAFT
           first: 3
-          orderBy: publishedAt_DESC
-          where: { NOT: {urlSlug: "${this.urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: { tagValue_in: ${JSON.stringify(hygraphResp.data.articles[0].contentTag.map((tag) => tag.tagValue))}}}
+          orderBy: date_ASC
+          where: { NOT: {urlSlug: "${this.urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: { tagValue_in: ${JSON.stringify(tags || hygraphResp.data.articles[0].contentTag.map((tag) => tag.tagValue))}}}
         ) {
           id
           urlSlug
