@@ -31,14 +31,14 @@ class InstanceStore {
 export const articleRefs = new InstanceStore();
 const i = 0;
 
-export const createArticleHandler = async (articleConfig, slug) => {
+export const createArticleHandler = async (articleConfig, eventDetails) => {
   document.querySelector(".articles-container.single").prepend(createLoader());
-  createArticleUrl(slug);
+  createArticleUrl(eventDetails.slug);
   const articleInstance = new Article(articleConfig);
-  await articleInstance.build(slug);
+  await articleInstance.build(eventDetails);
   articleRefs.storeInstance(Article, articleInstance);
   const relatedArticles =
-    articleRefs.getInstance(Article).article.relatedArticles;
+    articleRefs.getInstance(Article).relatedArticles.data.articles;
   if (relatedArticles.length > 0) {
     createArticleGridHandler(articleConfig, relatedArticles);
     updateGridTitle("Related Articles");
@@ -157,7 +157,7 @@ window.initializeArticles = async (config) => {
       impressureRouteFromUrl === "article"
         ? "best-free-cheap-auto-insurance-in-affordable-options-for-2024"
         : window.location.pathname.split("/")[2];
-    createArticleHandler(config, slug);
+    createArticleHandler(config, {slug: slug, tags: null});
     createBackButton(config);
   } else {
     createArticleGridHandler(config);

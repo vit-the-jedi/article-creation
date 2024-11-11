@@ -18,11 +18,15 @@ export class ArticleGrid extends ArticleController {
           const newArticleFromState = this.articles.find((article) => article.id === parentElement.id);
           const newArticleSlug = newArticleFromState.urlSlug;
           parentElement.removeEventListener('click', this.events.click);
+          const tags = newArticleFromState.contentTag.map((tag) => tag.tagValue);
 
           const parentArticle = articleRefs.getInstance(Article);
           if(parentArticle) destroyArticle(parentArticle, document.querySelector('.articles-container.single > .wrapper'));
           destroyArticle(articleRefs.getInstance(ArticleGrid), document.querySelector('.articles-container.grid > .wrapper'));
-          const createArticleEvent = new CustomEvent('createArticle', { detail: newArticleSlug });
+          const createArticleEvent = new CustomEvent('createArticle', { detail: {
+            slug: newArticleSlug,
+            tags: tags
+          }});
           document.dispatchEvent(createArticleEvent);
         }
       }
@@ -74,6 +78,9 @@ export class ArticleGrid extends ArticleController {
                           title
                           secondaryImage {
                             url
+                          }
+                          contentTag {
+                            tagValue
                           }
                           readTime
                           publishedAt

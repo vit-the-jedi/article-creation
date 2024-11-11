@@ -45,10 +45,12 @@ export class Article extends ArticleController {
     //build the one article we have
     buildArticleAndAppend(articleResp);
   }
-  async build(urlSlug){
+  async build({slug, tags} = eventDetails){
     this.domain = this.transformDomainToHygraphAPIRef();
-    this.urlSlug = urlSlug;
-    this.query = `query GetArticleBySlugAndRelatedArticles {
+    this.urlSlug = slug;
+    this.relatedArticles = null;
+    //query needs to be updated to include tags if they are present
+    this.query = `query GetArticleBySlug{
                         articles(
                           stage: DRAFT
                           where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, urlSlug: "${this.urlSlug}", domain: ${this.domain}}
@@ -69,29 +71,47 @@ export class Article extends ArticleController {
                           content {
                             html
                           }
-                          relatedArticles {
-                            id
-                            urlSlug
-                            title
-                            secondaryImage {
-                              url
-                            }
-                            readTime
-                            publishedAt
-                            excerpt
-                            date
-                            coverImage {
-                              url
-                            }
-                            content {
-                              html
-                            }
+                          contentTag {
+                            tagValue
                           }
                         }
                       }`;
     const hygraphResp = await this.fetchHandler(this.query);
-    console.log(`RESP:`, (hygraphResp))
+    console.log(`ARTCILE RESP:`, (hygraphResp))
+    if (hygraphResp.data.articles[0].contentTag.length > 0) {
+      this.relatedArticlesQuery = `query GetRelatedArticles {
+        articles(
+          stage: DRAFT
+          first: 3
+          orderBy: publishedAt_DESC
+          where: { NOT: {urlSlug: "${this.urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: { tagValue_in: ${JSON.stringify(hygraphResp.data.articles[0].contentTag.map((tag) => tag.tagValue))}}}
+        ) {
+          id
+          urlSlug
+          title
+          secondaryImage {
+            url
+          }
+          readTime
+          publishedAt
+          excerpt
+          date
+          coverImage {
+            url
+          }
+          content {
+            html
+          }
+          contentTag {
+            tagValue
+          }
+        }
+      }`;
+    }
     this.article = hygraphResp.data.articles[0];
+    this.relatedArticles = await this.fetchHandler(this.relatedArticlesQuery);
+    console.log(`RELATED RESP:`, (this.relatedArticles));
+    console.log(this);
     this.buildArticle(this.article);
   }
 }
