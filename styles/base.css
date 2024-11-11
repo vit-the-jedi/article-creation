@@ -6,10 +6,14 @@
   margin: auto;
   width: 100%;
 }
-.article h1, .article h2 {
+.article h1,
+.article h2 {
   margin: 25px 0;
 }
-.article h3, .article h4, .article h5, .article h6 {
+.article h3,
+.article h4,
+.article h5,
+.article h6 {
   margin: 15px 0;
 }
 .article .article-title {
@@ -61,14 +65,19 @@
 }
 .articles-container .back-btn {
   margin: auto;
-  display:block;
+  display: block;
   background: none;
   border: none;
-  max-width: 200px;
+  max-width: 300px;
   width: 60%;
-  color: var(--mainColor);
-  text-decoration: underline;
+  color: white;
+  background-color: var(--mainColor);
+  padding: 20px 30px;
+  text-transform: uppercase;
+  border-radius: 4px;
   cursor: pointer;
+  margin-top: 20px;
+  font-weight: bold;
 }
 /*
 .article-page .row {

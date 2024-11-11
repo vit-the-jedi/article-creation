@@ -96,7 +96,7 @@ export const createBackButton = (articleConfig) => {
       type: "button",
       class: "back-btn articles-back-btn",
     });
-    back.textContent = "< Back to Articles";
+    back.textContent = "Back to Articles";
     back.addEventListener("click", function (ev) {
       ev.preventDefault();
       scrollToHeader();
