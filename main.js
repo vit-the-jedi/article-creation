@@ -63,7 +63,7 @@ export const createArticleGridHandler = async (
       relatedArticles
     );
     await articleGridInstanceWithRelated.build();
-    articleRefs.storeInstance(ArticleGrid);
+    articleRefs.storeInstance(ArticleGrid, articleGridInstanceWithRelated);
   } else {
     const articleGridInstance = new ArticleGrid(articleConfig);
     await articleGridInstance.build();
