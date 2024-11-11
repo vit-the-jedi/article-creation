@@ -32,6 +32,7 @@ export const articleRefs = new InstanceStore();
 const i = 0;
 
 export const createArticleHandler = async (articleConfig, eventDetails) => {
+  document.body.classList.add("articles-loading");
   document.querySelector(".articles-container.single").prepend(createLoader());
   createArticleUrl(eventDetails.slug);
   const articleInstance = new Article(articleConfig);
@@ -135,6 +136,7 @@ const createLoader = () => {
   return loader;
 };
 const removeLoader = () => {
+  document.body.classList.remove("articles-loading");
   document.querySelector(".loader").remove();
 }
 

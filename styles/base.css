@@ -1,5 +1,8 @@
 @charset "UTF-8";
 
+body.articles-loading .articles-container {
+  height: 100vh;
+}
 /*articles*/
 .articles-container {
   max-width: 700px;
