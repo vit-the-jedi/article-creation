@@ -82,6 +82,26 @@ body.articles-loading .articles-container {
   margin-top: 20px;
   font-weight: bold;
 }
+.article-tag-container {
+  border-top: 1px solid #e6e6e6;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 40px auto;
+}
+.article-tag-container .article-date {
+  flex-basis: 100%;
+  max-width: 100%;
+}
+.article-tag-container .article-tag {
+  background-color: var(--mainColor);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  cursor: pointer;
+}
 /*
 .article-page .row {
   display: flex;

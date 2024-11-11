@@ -41,8 +41,7 @@ export const createArticleHandler = async (articleConfig, eventDetails) => {
   const relatedArticles =
     articleRefs.getInstance(Article).relatedArticles.data.articles;
   if (relatedArticles.length > 0) {
-    createArticleGridHandler(articleConfig, relatedArticles);
-    updateGridTitle("Related Articles");
+    createArticleGridHandler(articleConfig, relatedArticles, "Related Articles");
   } else {
     articleRefs.deleteInstance(ArticleGrid);
     updateGridTitle("");
@@ -55,7 +54,8 @@ export const createArticleHandler = async (articleConfig, eventDetails) => {
 
 export const createArticleGridHandler = async (
   articleConfig,
-  relatedArticles
+  relatedArticles, 
+  gridTitle
 ) => {
   document.querySelector(".articles-container.grid").prepend(createLoader());
   if (relatedArticles) {
@@ -69,8 +69,8 @@ export const createArticleGridHandler = async (
     const articleGridInstance = new ArticleGrid(articleConfig);
     await articleGridInstance.build();
     articleRefs.storeInstance(ArticleGrid, articleGridInstance);
-    updateGridTitle("Latest Articles");
   }
+  updateGridTitle(gridTitle);
   removeLoader();
 };
 
@@ -100,6 +100,7 @@ export const createBackButton = (articleConfig) => {
     back.textContent = "Back to Articles";
     back.addEventListener("click", function (ev) {
       ev.preventDefault();
+      delete articleConfig.tag;
       scrollToHeader();
       destroyArticle(
         articleRefs.getInstance(Article),
@@ -109,7 +110,7 @@ export const createBackButton = (articleConfig) => {
         articleRefs.getInstance(ArticleGrid),
         document.querySelector(".articles-container.grid > .wrapper")
       );
-      createArticleGridHandler(articleConfig);
+      createArticleGridHandler(articleConfig, null, "Latest Articles");
       document.querySelector(".articles-container.grid").removeChild(ev.target);
     });
     document.querySelector(".articles-container.grid").appendChild(back);
@@ -141,8 +142,33 @@ const removeLoader = () => {
 }
 
 export const createDate = (hygraphDate) => {
+  const dateHelper = {
+    days: {
+      0: "Sunday",
+      1: "Monday",
+      2: "Tuesday",
+      3: "Wednesday",
+      4: "Thursday",
+      5: "Friday",
+      6: "Saturday"
+    },
+    months: {
+      0: "January",
+      1: "February",
+      2: "March",
+      3: "April",
+      4: "May",
+      5: "June",
+      6: "July",
+      7: "August",
+      8: "September",
+      9: "October",
+      10: "November",
+      11: "December"
+    },
+  }
   const date = new Date(hygraphDate);
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  return `Published ${dateHelper.days[date.getDay()]}, ${dateHelper.months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
 window.initializeArticles = async (config) => {
@@ -156,6 +182,18 @@ window.initializeArticles = async (config) => {
     createArticleHandler(config, e.detail);
     createBackButton(config);
   });
+  document.addEventListener("createArticleGrid", (e) => {
+    console.log(`createArticleGrid event`, e.detail);
+    let title;
+    if(e.detail.tag){
+      config.tag = e.detail.tag;
+      title = e.detail.tag.charAt(0).toUpperCase() + e.detail.tag.slice(1) + " Articles";
+    }else {
+      title = "Latest Articles";
+    }
+    createArticleGridHandler(config, null, title);
+    createBackButton(config);
+  });
   if (
     window.location.pathname.split("/")[1] === "article" ||
     impressureRouteFromUrl === "article"
@@ -167,6 +205,6 @@ window.initializeArticles = async (config) => {
     createArticleHandler(config, {slug: slug, tags: null});
     createBackButton(config);
   } else {
-    createArticleGridHandler(config);
+    createArticleGridHandler(config, null, "Latest Articles");
   }
 };

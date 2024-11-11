@@ -1,13 +1,24 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import { createNode, createDate } from "../main.js";
+import {ArticleGrid} from "./article-grid.js";
+import { destroyArticle, articleRefs, createNode, createDate } from "../main.js";
 
 export class Article extends ArticleController {
   constructor(config){
     super(config);
     this.urlSlug = config.urlSlug;
     this.article = null;
+    this.events = {
+      tagClick:(ev) => {
+        destroyArticle(articleRefs.getInstance(Article), document.querySelector('.articles-container.single > .wrapper'));
+        destroyArticle(articleRefs.getInstance(ArticleGrid), document.querySelector('.articles-container.grid > .wrapper'));
+          const createArticleGridEvent = new CustomEvent('createArticleGrid', { detail: {
+            tag: ev.target.dataset.tag
+          }});
+          document.dispatchEvent(createArticleGridEvent);
+      }
+    }
   }
   buildArticle(articleResp, appendContainerSelector = null) {
     const buildArticleAndAppend = (articleObj) => {
@@ -34,12 +45,21 @@ export class Article extends ArticleController {
         class: "article",
         id: articleObj.id,
       });
+      const articleMetadata = createNode("div", {class: "article-tag-container"});
+      articleObj.contentTag.forEach((tag) => {
+        const tagNode = createNode("span", {class: "article-tag"});
+        tagNode.textContent = tag.tagValue;
+        tagNode.dataset.tag = tag.tagValue;
+        tagNode.addEventListener("click", this.events.tagClick);
+        articleMetadata.appendChild(tagNode);
+      });
+      articleMetadata.prepend(date);
       const articleContainer = document.querySelector(".articles-container.single > .wrapper");
       articleContent.appendChild(title);
-      articleContent.appendChild(date);
       articleContent.appendChild(image);
       articleContent.appendChild(html);
       articleContainer.append(articleContent);
+      articleContainer.append(articleMetadata);
       //SETLOADING(FALSE)
     };
     //build the one article we have

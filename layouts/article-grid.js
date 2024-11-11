@@ -9,6 +9,7 @@ export class ArticleGrid extends ArticleController {
     super(config);
     console.log('grid instance creation', (data));
     this.articles = data;
+    this.tag = config.tag ?? null;
     this.events = {
       click: (ev) => {
         const parentElement = ev.target.closest('.article-card');
@@ -98,11 +99,44 @@ export class ArticleGrid extends ArticleController {
                           }
                         }
                       }`;
-    //if we didn't get passed data, fetch it with the query
-    //else we can assume we are building from related articles
-    if(!this.articles){
-      const allArticlesResp = await this.fetchHandler(this.query);
-      this.articles = allArticlesResp.data.articles;
+    if(this.tag){
+      this.query = `query GetArticlesByTag {
+        articles(
+          stage: DRAFT
+          first: 20
+          orderBy: date_ASC
+          where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: {tagValue: "${this.tag}"}}
+        ) {
+          id
+          urlSlug
+          title
+          secondaryImage {
+            url
+          }
+          contentTag {
+            tagValue
+          }
+          readTime
+          publishedAt
+          excerpt
+          date
+          coverImage {
+            url
+          }
+          content {
+            html
+          }
+        }
+      }`;
+      const tagsArticlesResp = await this.fetchHandler(this.query);
+      this.articles = tagsArticlesResp.data.articles;
+    }else {
+      //if we didn't get passed data, fetch it with the query
+      //else we can assume we are building from related articles
+      if(!this.articles){
+        const allArticlesResp = await this.fetchHandler(this.query);
+        this.articles = allArticlesResp.data.articles;
+      }
     }
     console.log(this);
     this.buildArticleGrid(this.articles);
