@@ -30,7 +30,7 @@ export class Article extends ArticleController {
         class: "article-cover-img",
         style: "max-width:100%;width:100%;display:block",
       });
-      image.src = articleObj?.coverImage.url;
+      image.src = articleObj?.coverImage?.url;
       if (articleObj?.secondaryImage?.url) {
         const secondaryImage = createNode("img", {
           class: "article-secondary-img",
@@ -56,7 +56,7 @@ export class Article extends ArticleController {
       articleMetadata.prepend(date);
       const articleContainer = document.querySelector(".articles-container.single > .wrapper");
       articleContent.appendChild(title);
-      articleContent.appendChild(image);
+      if(articleObj?.coverImage?.url) articleContent.appendChild(image);
       articleContent.appendChild(html);
       articleContainer.append(articleContent);
       articleContainer.append(articleMetadata);
