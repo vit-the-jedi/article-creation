@@ -45,7 +45,7 @@ export class ArticleGrid extends ArticleController {
         class: "article-cover-img",
         style: "max-width:100%;width:100%;display:block",
       });
-      image.src = articleObj?.coverImage.url;
+      image.src = articleObj?.coverImage?.url;
       const articleContent = createNode("div", {
         class: "article-card",
         id: articleObj.id,
@@ -56,7 +56,7 @@ export class ArticleGrid extends ArticleController {
       articleLink.addEventListener("click", this.events.click);
       const articleContainer = document.querySelector(".articles-container.grid > .wrapper");
       articleContainer.classList.add("article-grid");
-      articleLink.appendChild(image);
+      if (articleObj?.coverImage?.url) articleLink.appendChild(image);
       articleLink.appendChild(title);
       articleLink.appendChild(publishedDate);
       articleLink.appendChild(excerpt);
