@@ -41,20 +41,26 @@ export const createArticleHandler = async (articleConfig, eventDetails) => {
   const relatedArticles =
     articleRefs.getInstance(Article).relatedArticles.data.articles;
   if (relatedArticles.length > 0) {
-    createArticleGridHandler(articleConfig, relatedArticles, "Related Articles");
+    createArticleGridHandler(
+      articleConfig,
+      relatedArticles,
+      "Related Articles"
+    );
   } else {
     articleRefs.deleteInstance(ArticleGrid);
     updateGridTitle("");
   }
   removeLoader();
   articleInstance.analytics.init();
-  articleInstance.analytics.events.view(articleRefs.getInstance(Article).article.title);
+  articleInstance.analytics.events.view(
+    articleRefs.getInstance(Article).article.title
+  );
   console.log(`state after creation`, articleRefs.state());
 };
 
 export const createArticleGridHandler = async (
   articleConfig,
-  relatedArticles, 
+  relatedArticles,
   gridTitle
 ) => {
   document.querySelector(".articles-container.grid").prepend(createLoader());
@@ -85,6 +91,10 @@ const createArticleUrl = (slug) => {
   window.history.pushState({}, "", `/article/${slug}`);
 };
 
+const resetArticleUrl = () => {
+  window.history.pushState({}, "", "/articles");
+}
+
 export const scrollToHeader = () => {
   const pageHeader =
     document.querySelector(".regionHeader") || document.querySelector("header");
@@ -110,6 +120,7 @@ export const createBackButton = (articleConfig) => {
         articleRefs.getInstance(ArticleGrid),
         document.querySelector(".articles-container.grid > .wrapper")
       );
+      resetArticleUrl();
       createArticleGridHandler(articleConfig, null, "Latest Articles");
       document.querySelector(".articles-container.grid").removeChild(ev.target);
     });
@@ -139,7 +150,7 @@ const createLoader = () => {
 const removeLoader = () => {
   document.body.classList.remove("articles-loading");
   document.querySelector(".loader").remove();
-}
+};
 
 export const createDate = (hygraphDate) => {
   const dateHelper = {
@@ -150,7 +161,7 @@ export const createDate = (hygraphDate) => {
       3: "Wednesday",
       4: "Thursday",
       5: "Friday",
-      6: "Saturday"
+      6: "Saturday",
     },
     months: {
       0: "January",
@@ -164,11 +175,21 @@ export const createDate = (hygraphDate) => {
       8: "September",
       9: "October",
       10: "November",
-      11: "December"
+      11: "December",
     },
-  }
+  };
   const date = new Date(hygraphDate);
-  return `Published ${dateHelper.days[date.getDay()]}, ${dateHelper.months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  return `Published ${dateHelper.days[date.getDay()]}, ${
+    dateHelper.months[date.getMonth()]
+  } ${date.getDate()}, ${date.getFullYear()}`;
+};
+
+getSlugFromUrl = () => {
+  if(window.location.pathname.split("/").length > 3) {
+    return window.location.pathname.split("/")[2];
+  }else {
+    return null;
+  }
 }
 
 window.initializeArticles = async (config) => {
@@ -185,10 +206,13 @@ window.initializeArticles = async (config) => {
   document.addEventListener("createArticleGrid", (e) => {
     console.log(`createArticleGrid event`, e.detail);
     let title;
-    if(e.detail.tag){
+    if (e.detail.tag) {
       config.tag = e.detail.tag;
-      title = e.detail.tag.charAt(0).toUpperCase() + e.detail.tag.slice(1) + " Articles";
-    }else {
+      title =
+        e.detail.tag.charAt(0).toUpperCase() +
+        e.detail.tag.slice(1) +
+        " Articles";
+    } else {
       title = "Latest Articles";
     }
     createArticleGridHandler(config, null, title);
@@ -201,9 +225,15 @@ window.initializeArticles = async (config) => {
     const slug =
       impressureRouteFromUrl === "article"
         ? "best-free-cheap-auto-insurance-in-affordable-options-for-2024"
-        : window.location.pathname.split("/")[2];
-    createArticleHandler(config, {slug: slug, tags: null});
-    createBackButton(config);
+        : getSlugFromUrl();
+    if (slug) {
+      createArticleHandler(config, { slug: slug, tags: null });
+      createBackButton(config);
+    }else {
+      console.warn(`No slug found in URL, redirecting to articles`);
+      resetArticleUrl();
+      createArticleGridHandler(config, null, "Latest Articles");
+    }
   } else {
     createArticleGridHandler(config, null, "Latest Articles");
   }

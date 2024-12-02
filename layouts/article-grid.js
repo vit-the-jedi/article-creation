@@ -7,7 +7,7 @@ import { destroyArticle, articleRefs, scrollToHeader, createNode, createDate } f
 export class ArticleGrid extends ArticleController {
   constructor(config, data) {
     super(config);
-    console.log('grid instance creation', (data));
+    console.log('grid instance creation initial data', (data));
     this.articles = data;
     this.tag = config.tag ?? null;
     this.events = {
