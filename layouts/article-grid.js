@@ -2,7 +2,7 @@
 
 import { ArticleController } from "./base.js";
 import { Article } from "./article-single.js";
-import { destroyArticle, articleRefs, scrollToHeader, createNode, createDate } from "../main.js";
+import { destroyArticle, articleRefs, scrollToHeader, createNode, createDate, createNoArticlesMessage, uppercaseTagValue } from "../main.js";
 
 export class ArticleGrid extends ArticleController {
   constructor(config, data) {
@@ -112,7 +112,7 @@ export class ArticleGrid extends ArticleController {
           stage: DRAFT
           first: 20
           orderBy: date_ASC
-          where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: {tagValue: "${this.tag}"}}
+          where: {NOT: {urlSlug: "${articleRefs.getInstance(Article).urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: {tagValue: "${this.tag}"}}
         ) {
           id
           urlSlug
@@ -146,6 +146,11 @@ export class ArticleGrid extends ArticleController {
       }
     }
     console.log(this);
-    this.buildArticleGrid(this.articles);
+    if(this.articles.length > 0){
+      this.buildArticleGrid(this.articles);
+    }else {
+      createNoArticlesMessage(document.querySelector(".articles-container.grid > .wrapper"), `No ${uppercaseTagValue(this.tag)} articles found. You can navigate back to other articles by clicking the back button.`);
+    }
+
   }
 }

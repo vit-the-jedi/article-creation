@@ -101,6 +101,14 @@ export const scrollToHeader = () => {
   if (pageHeader) pageHeader.scrollIntoView();
 };
 
+export const createNoArticlesMessage = (container, msg = "No articles found, please check back later.") => {
+  const message = createNode("p", { class: "no-articles-message" });
+  message.textContent = msg;
+  container.prepend(message);
+};
+
+export const uppercaseTagValue = (tag) => tag.charAt(0).toUpperCase() + tag.slice(1);
+
 export const createBackButton = (articleConfig) => {
   if (!document.querySelector(".articles-back-btn")) {
     const back = createNode("button", {
@@ -209,8 +217,7 @@ window.initializeArticles = async (config) => {
     if (e.detail.tag) {
       config.tag = e.detail.tag;
       title =
-        e.detail.tag.charAt(0).toUpperCase() +
-        e.detail.tag.slice(1) +
+        uppercaseTagValue(e.detail.tag) +
         " Articles";
     } else {
       title = "Latest Articles";

@@ -36,7 +36,11 @@ body.articles-loading .articles-container {
   object-fit: cover;
   width: 100%;
 }
-
+.related-articles .article-grid:has(.no-articles-message) {
+  display: block;
+  margin-bottom: 40px !important;
+  text-align: center;
+}
 .article-grid div:has(.isEmpty) {
   display: none;
 }
