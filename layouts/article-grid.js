@@ -41,9 +41,10 @@ export class ArticleGrid extends ArticleController {
       title.textContent = articleObj.title;
       const publishedDate = createNode("p", { class: "article-date article-metadata" });
       publishedDate.textContent = createDate(articleObj.publishedAt ?? articleObj.date);
+      const imageContainer = createNode("div", {  class: "article-cover-img-container" });
       const image = createNode("img", {
         class: "article-cover-img",
-        style: "max-width:100%;width:100%;display:block",
+        // style: "max-width:100%;width:100%;display:block",
       });
       image.src = articleObj?.coverImage?.url;
       const articleContent = createNode("div", {
@@ -53,13 +54,19 @@ export class ArticleGrid extends ArticleController {
       const articleLink = createNode("a", {
         href: "javascript:void(0)",
       });
+      const continueReadingLink = createNode("p", {
+        class: "continue-reading",
+      });
+      continueReadingLink.textContent = "Continue Reading";
       articleLink.addEventListener("click", this.events.click);
       const articleContainer = document.querySelector(".articles-container.grid > .wrapper");
       articleContainer.classList.add("article-grid");
-      if (articleObj?.coverImage?.url) articleLink.appendChild(image);
+      if (articleObj?.coverImage?.url) imageContainer.appendChild(image);
+      articleLink.appendChild(imageContainer);
       articleLink.appendChild(title);
-      articleLink.appendChild(publishedDate);
+      //articleLink.appendChild(publishedDate);
       articleLink.appendChild(excerpt);
+      articleLink.appendChild(continueReadingLink);
       articleContent.appendChild(articleLink);
       articleContainer.append(articleContent);
       //SETLOADING(FALSE)

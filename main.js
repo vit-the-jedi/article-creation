@@ -184,7 +184,7 @@ export const createDate = (hygraphDate) => {
   } ${date.getDate()}, ${date.getFullYear()}`;
 };
 
-getSlugFromUrl = () => {
+const getSlugFromUrl = () => {
   if(window.location.pathname.split("/").length > 3) {
     return window.location.pathname.split("/")[2];
   }else {

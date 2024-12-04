@@ -5,7 +5,6 @@ body.articles-loading .articles-container {
 }
 /*articles*/
 .articles-container {
-  max-width: 700px;
   margin: auto;
   width: 100%;
 }
@@ -23,18 +22,23 @@ body.articles-loading .articles-container {
   font-weight: bold;
   font-size: 2.5rem;
 }
-.article .article-cover-img {
-  margin-bottom: 25px;
+.article-cover-img-container {
+  padding: 0;
+  display: flex;
+  background-color: #ddd;
+  height: 200px;
 }
 .article-cover-img {
-  border-radius: 5px;
+  max-height: 300px;
+  object-fit: cover;
+  width: 100%;
 }
+
 .article-grid div:has(.isEmpty) {
   display: none;
 }
 .article-grid {
   display: grid;
-  grid-gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-template-rows: repeat(auto, 50px);
   margin-top: 50px;
@@ -52,35 +56,53 @@ body.articles-loading .articles-container {
   display: flex;
   flex-direction: column;
   justify-content: start;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  margin-bottom: 20px;
 }
-
+.article-card a {
+  text-decoration: none;
+  font-size: 1.25rem;
+  color: #666666;
+}
+.article-metadata {
+  font-size: 1rem;
+}
 .article-grid .article-card .article-title {
   font-size: 1.5rem;
   padding: 10px 0;
+  color: #666666;
+  font-weight: 600;
 }
 .article-grid .article-card .article-excerpt {
-  font-size: 1rem;
   display: block;
 }
-.related-articles-container {
-  margin: 100px 0;
+.article-grid .article-card .continue-reading {
+  color: var(--mainColor);
+  font-weight: bold;
+  margin-top: 10px;
+  border-bottom: 2px solid var(--mainColor);
+  display: inline;
 }
 .articles-container .back-btn {
-  margin: auto;
+  margin: 20px auto 100px auto;
   display: block;
   background: none;
   border: none;
-  max-width: 300px;
+  max-width: 225px;
   width: 60%;
   color: white;
   background-color: var(--mainColor);
-  padding: 20px 30px;
+  padding: 10px 15px;
   text-transform: uppercase;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 20px;
   font-weight: bold;
+}
+.articles-container .back-btn::before {
+  content: "\279C";
+  margin-right: 10px;
+  max-width: 20px;
+  display: inline-block;
+  transform: rotate(180deg);
 }
 .article-tag-container {
   border-top: 1px solid #e6e6e6;
@@ -93,10 +115,10 @@ body.articles-loading .articles-container {
   max-width: 100%;
 }
 .article-tag-container .article-tag {
-  background-color: var(--mainColor);
-  color: white;
+  background-color: #e6e6e6;
+  border-radius: 100px;
+  color: black;
   padding: 5px 10px;
-  border-radius: 5px;
   margin-right: 10px;
   margin-bottom: 10px;
   margin-top: 20px;

@@ -47,7 +47,7 @@ export class Article extends ArticleController {
       });
       const articleMetadata = createNode("div", {class: "article-tag-container"});
       articleObj.contentTag.forEach((tag) => {
-        const tagNode = createNode("span", {class: "article-tag"});
+        const tagNode = createNode("span", {class: "article-tag article-metadata"});
         tagNode.textContent = tag.tagValue;
         tagNode.dataset.tag = tag.tagValue;
         tagNode.addEventListener("click", this.events.tagClick);
