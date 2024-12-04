@@ -28,6 +28,9 @@ body.articles-loading .articles-container {
   background-color: #ddd;
   height: 200px;
 }
+.article .article-cover-img {
+  margin: 20px auto 40px auto;
+}
 .article-cover-img {
   max-height: 300px;
   object-fit: cover;
@@ -64,7 +67,7 @@ body.articles-loading .articles-container {
   color: #666666;
 }
 .article-metadata {
-  font-size: 1rem;
+  font-size: 1.15rem;
 }
 .article-grid .article-card .article-title {
   font-size: 1.5rem;
