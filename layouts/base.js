@@ -80,6 +80,10 @@ export class ArticleController {
         return "protectCom";
       case "free-insurance-quotes.us":
         return "freeInsuranceQuotesUs";
+      case "simplyjobs.com":
+        return "simplyjobsCom";
+      case "searchmynewjob.com":
+        return "searchmynewjobCom";
       default:
         throw new Error("Article Creation: Domain not found/invalid");
     }
