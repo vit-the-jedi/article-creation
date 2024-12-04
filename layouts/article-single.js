@@ -2,7 +2,7 @@
 
 import { ArticleController } from "./base.js";
 import {ArticleGrid} from "./article-grid.js";
-import { destroyArticle, articleRefs, createNode, createDate } from "../main.js";
+import { destroyArticle, articleRefs, createNode, createDate, scrollToHeader } from "../main.js";
 
 export class Article extends ArticleController {
   constructor(config){
@@ -11,6 +11,7 @@ export class Article extends ArticleController {
     this.article = null;
     this.events = {
       tagClick:(ev) => {
+        scrollToHeader();
         destroyArticle(articleRefs.getInstance(Article), document.querySelector('.articles-container.single > .wrapper'));
         destroyArticle(articleRefs.getInstance(ArticleGrid), document.querySelector('.articles-container.grid > .wrapper'));
           const createArticleGridEvent = new CustomEvent('createArticleGrid', { detail: {
