@@ -4,6 +4,8 @@ import { Article } from "./layouts/article-single";
 import { ArticleGrid } from "./layouts/article-grid";
 import "./styles/base.css";
 
+let impressureRouteFromUrl;
+
 class InstanceStore {
   constructor() {
     this.store = new Map();
@@ -55,7 +57,6 @@ export const createArticleHandler = async (articleConfig, eventDetails) => {
   articleInstance.analytics.events.view(
     articleRefs.getInstance(Article).article.title
   );
-  console.log(`state after creation`, articleRefs.state());
 };
 
 export const createArticleGridHandler = async (
@@ -93,7 +94,7 @@ const createArticleUrl = (slug) => {
 
 const resetArticleUrl = () => {
   window.history.pushState({}, "", "/articles");
-}
+};
 
 export const scrollToHeader = () => {
   const pageHeader =
@@ -101,13 +102,17 @@ export const scrollToHeader = () => {
   if (pageHeader) pageHeader.scrollIntoView();
 };
 
-export const createNoArticlesMessage = (container, msg = "No articles found, please check back later.") => {
+export const createNoArticlesMessage = (
+  container,
+  msg = "No articles found, please check back later."
+) => {
   const message = createNode("p", { class: "no-articles-message" });
   message.textContent = msg;
   container.prepend(message);
 };
 
-export const uppercaseTagValue = (tag) => tag.charAt(0).toUpperCase() + tag.slice(1);
+export const uppercaseTagValue = (tag) =>
+  tag.charAt(0).toUpperCase() + tag.slice(1);
 
 export const createBackButton = (articleConfig) => {
   if (!document.querySelector(".articles-back-btn")) {
@@ -121,16 +126,16 @@ export const createBackButton = (articleConfig) => {
       delete articleConfig.tag;
       scrollToHeader();
       destroyArticle(
-        articleRefs.getInstance(Article),
+        Article,
         document.querySelector(".articles-container.single > .wrapper")
       );
       destroyArticle(
-        articleRefs.getInstance(ArticleGrid),
+        ArticleGrid,
         document.querySelector(".articles-container.grid > .wrapper")
       );
       resetArticleUrl();
       createArticleGridHandler(articleConfig, null, "Latest Articles");
-      document.querySelector(".articles-container.grid").removeChild(ev.target);
+      document.dispatchEvent(new CustomEvent("removeArticlesBackButton"));
     });
     document.querySelector(".articles-container.grid").appendChild(back);
   }
@@ -193,20 +198,22 @@ export const createDate = (hygraphDate) => {
 };
 
 const getSlugFromUrl = () => {
-  if(window.location.pathname.split("/").length > 3) {
+  if (window.location.pathname.split("/").length > 3) {
     return window.location.pathname.split("/")[2];
-  }else {
+  } else {
     return null;
   }
-}
+};
+
+export const watchForHistoryChange = (callback) => {
+  window.addEventListener("popstate", callback);
+};
 
 window.initializeArticles = async (config) => {
+  impressureRouteFromUrl = config.impressureRouteFromUrl;
   //SETLOADIN(TRUE)
   //user navigating to specific article page
   //fetch specific article based onn route, else show all articles for domain
-  const impressureRouteFromUrl =
-    new URLSearchParams(window.location.search).get("route") || null;
-
   document.addEventListener("createArticle", (e) => {
     createArticleHandler(config, e.detail);
     createBackButton(config);
@@ -214,16 +221,19 @@ window.initializeArticles = async (config) => {
   document.addEventListener("createArticleGrid", (e) => {
     console.log(`createArticleGrid event`, e.detail);
     let title;
-    if (e.detail.tag) {
+    if (e?.detail?.tag) {
       config.tag = e.detail.tag;
-      title =
-        uppercaseTagValue(e.detail.tag) +
-        " Articles";
+      title = uppercaseTagValue(e.detail.tag) + " Articles";
     } else {
       title = "Latest Articles";
     }
     createArticleGridHandler(config, null, title);
     createBackButton(config);
+  });
+  document.addEventListener("removeArticlesBackButton", () => {
+    const backBtn = document.querySelector(".articles-back-btn");
+    const c = document.querySelector(".articles-container.grid");
+    c.removeChild(backBtn);
   });
   if (
     window.location.pathname.split("/")[1] === "article" ||
@@ -236,7 +246,7 @@ window.initializeArticles = async (config) => {
     if (slug) {
       createArticleHandler(config, { slug: slug, tags: null });
       createBackButton(config);
-    }else {
+    } else {
       console.warn(`No slug found in URL, redirecting to articles`);
       resetArticleUrl();
       createArticleGridHandler(config, null, "Latest Articles");

@@ -1,25 +1,55 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import {ArticleGrid} from "./article-grid.js";
-import { destroyArticle, articleRefs, createNode, createDate, scrollToHeader } from "../main.js";
+import { ArticleGrid } from "./article-grid.js";
+import {
+  destroyArticle,
+  articleRefs,
+  createNode,
+  createDate,
+  scrollToHeader,
+  watchForHistoryChange,
+} from "../main.js";
 
 export class Article extends ArticleController {
-  constructor(config){
+  constructor(config) {
     super(config);
     this.urlSlug = config.urlSlug;
     this.article = null;
     this.events = {
-      tagClick:(ev) => {
+      tagClick: (ev) => {
         scrollToHeader();
-        destroyArticle(articleRefs.getInstance(Article), document.querySelector('.articles-container.single > .wrapper'));
-        destroyArticle(articleRefs.getInstance(ArticleGrid), document.querySelector('.articles-container.grid > .wrapper'));
-          const createArticleGridEvent = new CustomEvent('createArticleGrid', { detail: {
-            tag: ev.target.dataset.tag
-          }});
-          document.dispatchEvent(createArticleGridEvent);
-      }
-    }
+        destroyArticle(
+          articleRefs.getInstance(Article),
+          document.querySelector(".articles-container.single > .wrapper")
+        );
+        destroyArticle(
+          articleRefs.getInstance(ArticleGrid),
+          document.querySelector(".articles-container.grid > .wrapper")
+        );
+        const createArticleGridEvent = new CustomEvent("createArticleGrid", {
+          detail: {
+            tag: ev.target.dataset.tag,
+          },
+        });
+        document.dispatchEvent(createArticleGridEvent);
+      },
+      historyChange: (ev) => {
+        scrollToHeader();
+        destroyArticle(
+          Article,
+          document.querySelector(".articles-container.single > .wrapper")
+        );
+        destroyArticle(
+          ArticleGrid,
+          document.querySelector(".articles-container.grid > .wrapper")
+        );
+        const createArticleGridEvent = new CustomEvent("createArticleGrid");
+        document.dispatchEvent(createArticleGridEvent);
+        document.dispatchEvent(new CustomEvent("removeArticlesBackButton"));
+        window.removeEventListener("popstate", this);
+      },
+    };
   }
   buildArticle(articleResp, appendContainerSelector = null) {
     const buildArticleAndAppend = (articleObj) => {
@@ -46,18 +76,24 @@ export class Article extends ArticleController {
         class: "article",
         id: articleObj.id,
       });
-      const articleMetadata = createNode("div", {class: "article-tag-container"});
+      const articleMetadata = createNode("div", {
+        class: "article-tag-container",
+      });
       articleObj.contentTag.forEach((tag) => {
-        const tagNode = createNode("span", {class: "article-tag article-metadata"});
+        const tagNode = createNode("span", {
+          class: "article-tag article-metadata",
+        });
         tagNode.textContent = tag.tagValue;
         tagNode.dataset.tag = tag.tagValue;
         tagNode.addEventListener("click", this.events.tagClick);
         articleMetadata.appendChild(tagNode);
       });
       articleMetadata.prepend(date);
-      const articleContainer = document.querySelector(".articles-container.single > .wrapper");
+      const articleContainer = document.querySelector(
+        ".articles-container.single > .wrapper"
+      );
       articleContent.appendChild(title);
-      if(articleObj?.coverImage?.url) articleContent.appendChild(image);
+      if (articleObj?.coverImage?.url) articleContent.appendChild(image);
       articleContent.appendChild(html);
       articleContainer.append(articleContent);
       articleContainer.append(articleMetadata);
@@ -65,8 +101,9 @@ export class Article extends ArticleController {
     };
     //build the one article we have
     buildArticleAndAppend(articleResp);
+    watchForHistoryChange(this.events.historyChange);
   }
-  async build({slug, tags} = eventDetails){
+  async build({ slug, tags } = eventDetails) {
     this.domain = this.transformDomainToHygraphAPIRef();
     this.urlSlug = slug;
     this.relatedArticles = null;
@@ -99,14 +136,22 @@ export class Article extends ArticleController {
                         }
                       }`;
     const hygraphResp = await this.fetchHandler(this.query);
-    console.log(`ARTCILE RESP:`, (hygraphResp))
     if (hygraphResp.data.articles[0].contentTag.length > 0) {
       this.relatedArticlesQuery = `query GetRelatedArticles {
         articles(
           stage: DRAFT
           first: 3
           orderBy: date_ASC
-          where: { NOT: {urlSlug: "${this.urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: { tagValue_in: ${JSON.stringify(tags || hygraphResp.data.articles[0].contentTag.map((tag) => tag.tagValue))}}}
+          where: { NOT: {urlSlug: "${this.urlSlug}"}, vertical: "${
+        this.vertical
+      }", subvertical: "${this.subvertical}", articleType: ${
+        this.articleType
+      }, domain: ${
+        this.domain
+      }, contentTag_some: { tagValue_in: ${JSON.stringify(
+        tags ||
+          hygraphResp.data.articles[0].contentTag.map((tag) => tag.tagValue)
+      )}}}
         ) {
           id
           urlSlug
@@ -132,8 +177,6 @@ export class Article extends ArticleController {
     }
     this.article = hygraphResp.data.articles[0];
     this.relatedArticles = await this.fetchHandler(this.relatedArticlesQuery);
-    console.log(`RELATED RESP:`, (this.relatedArticles));
-    console.log(this);
     this.buildArticle(this.article);
   }
 }

@@ -2,36 +2,56 @@
 
 import { ArticleController } from "./base.js";
 import { Article } from "./article-single.js";
-import { destroyArticle, articleRefs, scrollToHeader, createNode, createDate, createNoArticlesMessage, uppercaseTagValue } from "../main.js";
+import {
+  destroyArticle,
+  articleRefs,
+  scrollToHeader,
+  createNode,
+  createDate,
+  createNoArticlesMessage,
+  uppercaseTagValue,
+} from "../main.js";
 
 export class ArticleGrid extends ArticleController {
   constructor(config, data) {
     super(config);
-    console.log('grid instance creation initial data', (data));
     this.articles = data;
     this.tag = config.tag ?? null;
     this.events = {
       click: (ev) => {
-        const parentElement = ev.target.closest('.article-card');
+        const parentElement = ev.target.closest(".article-card");
 
         if (parentElement) {
           scrollToHeader();
-          const newArticleFromState = this.articles.find((article) => article.id === parentElement.id);
+          const newArticleFromState = this.articles.find(
+            (article) => article.id === parentElement.id
+          );
           const newArticleSlug = newArticleFromState.urlSlug;
-          parentElement.removeEventListener('click', this.events.click);
-          const tags = newArticleFromState.contentTag.map((tag) => tag.tagValue);
+          parentElement.removeEventListener("click", this.events.click);
+          const tags = newArticleFromState.contentTag.map(
+            (tag) => tag.tagValue
+          );
 
           const parentArticle = articleRefs.getInstance(Article);
-          if(parentArticle) destroyArticle(parentArticle, document.querySelector('.articles-container.single > .wrapper'));
-          destroyArticle(articleRefs.getInstance(ArticleGrid), document.querySelector('.articles-container.grid > .wrapper'));
-          const createArticleEvent = new CustomEvent('createArticle', { detail: {
-            slug: newArticleSlug,
-            tags: tags
-          }});
+          if (parentArticle)
+            destroyArticle(
+              parentArticle,
+              document.querySelector(".articles-container.single > .wrapper")
+            );
+          destroyArticle(
+            ArticleGrid,
+            document.querySelector(".articles-container.grid > .wrapper")
+          );
+          const createArticleEvent = new CustomEvent("createArticle", {
+            detail: {
+              slug: newArticleSlug,
+              tags: tags,
+            },
+          });
           document.dispatchEvent(createArticleEvent);
         }
-      }
-    }
+      },
+    };
   }
   buildArticleGrid(integrationResp, appendContainerSelector = null) {
     const buildGridOfArticles = (articleObj) => {
@@ -39,9 +59,15 @@ export class ArticleGrid extends ArticleController {
       excerpt.textContent = this.trimExcerpt(articleObj.excerpt);
       const title = createNode("h2", { class: "article-title" });
       title.textContent = articleObj.title;
-      const publishedDate = createNode("p", { class: "article-date article-metadata" });
-      publishedDate.textContent = createDate(articleObj.publishedAt ?? articleObj.date);
-      const imageContainer = createNode("div", {  class: "article-cover-img-container" });
+      const publishedDate = createNode("p", {
+        class: "article-date article-metadata",
+      });
+      publishedDate.textContent = createDate(
+        articleObj.publishedAt ?? articleObj.date
+      );
+      const imageContainer = createNode("div", {
+        class: "article-cover-img-container",
+      });
       const image = createNode("img", {
         class: "article-cover-img",
         // style: "max-width:100%;width:100%;display:block",
@@ -59,7 +85,9 @@ export class ArticleGrid extends ArticleController {
       });
       continueReadingLink.textContent = "Continue Reading";
       articleLink.addEventListener("click", this.events.click);
-      const articleContainer = document.querySelector(".articles-container.grid > .wrapper");
+      const articleContainer = document.querySelector(
+        ".articles-container.grid > .wrapper"
+      );
       articleContainer.classList.add("article-grid");
       if (articleObj?.coverImage?.url) imageContainer.appendChild(image);
       articleLink.appendChild(imageContainer);
@@ -76,7 +104,7 @@ export class ArticleGrid extends ArticleController {
       buildGridOfArticles(article);
     }
   }
-  async build(){
+  async build() {
     this.domain = this.transformDomainToHygraphAPIRef();
     this.query = `query GetAllArticles {
                         articles(
@@ -106,13 +134,19 @@ export class ArticleGrid extends ArticleController {
                           }
                         }
                       }`;
-    if(this.tag){
+    if (this.tag) {
       this.query = `query GetArticlesByTag {
         articles(
           stage: DRAFT
           first: 20
           orderBy: date_ASC
-          where: {NOT: {urlSlug: "${articleRefs.getInstance(Article).urlSlug}"}, vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}, contentTag_some: {tagValue: "${this.tag}"}}
+          where: {NOT: {urlSlug: "${
+            articleRefs.getInstance(Article).urlSlug
+          }"}, vertical: "${this.vertical}", subvertical: "${
+        this.subvertical
+      }", articleType: ${this.articleType}, domain: ${
+        this.domain
+      }, contentTag_some: {tagValue: "${this.tag}"}}
         ) {
           id
           urlSlug
@@ -137,20 +171,23 @@ export class ArticleGrid extends ArticleController {
       }`;
       const tagsArticlesResp = await this.fetchHandler(this.query);
       this.articles = tagsArticlesResp.data.articles;
-    }else {
+    } else {
       //if we didn't get passed data, fetch it with the query
       //else we can assume we are building from related articles
-      if(!this.articles){
+      if (!this.articles) {
         const allArticlesResp = await this.fetchHandler(this.query);
         this.articles = allArticlesResp.data.articles;
       }
     }
-    console.log(this);
-    if(this.articles.length > 0){
+    if (this.articles.length > 0) {
       this.buildArticleGrid(this.articles);
-    }else {
-      createNoArticlesMessage(document.querySelector(".articles-container.grid > .wrapper"), `No ${uppercaseTagValue(this.tag)} articles found. You can navigate back to other articles by clicking the back button.`);
+    } else {
+      createNoArticlesMessage(
+        document.querySelector(".articles-container.grid > .wrapper"),
+        `No ${uppercaseTagValue(
+          this.tag
+        )} articles found. You can navigate back to other articles by clicking the back button.`
+      );
     }
-
   }
 }
