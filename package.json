@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run override",
+    "override": "node /Users/mattvitello/cli-tools/override-cli/bin/index.js './dist/js/client.js' 'stage.healthmarketadvisor.com/create-articles/js/client.js'",
     "preview": "vite preview"
   },
   "devDependencies": {
