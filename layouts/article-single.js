@@ -108,34 +108,71 @@ export class Article extends ArticleController {
     this.urlSlug = slug;
     this.relatedArticles = null;
     //query needs to be updated to include tags if they are present
-    this.query = `query GetArticleBySlug{
-                        articles(
-                          stage: DRAFT
-                          orderBy: publishedAt_DESC
-                          where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, urlSlug: "${this.urlSlug}", domain: ${this.domain}}
-                        ) {
-                          id
-                          urlSlug
-                          title
-                          secondaryImage {
-                            url
-                          }
-                          readTime
-                          publishedAt
-                          excerpt
-                          date
-                          coverImage {
-                            url
-                          }
-                          content {
-                            html
-                          }
-                          contentTag {
-                            tagValue
-                          }
-                        }
-                      }`;
-    const hygraphResp = await this.fetchHandler(this.query);
+    this.query = `getArticleWithRelated($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $urlSlug: String, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
+  article: articles(
+    where: {
+      vertical: $vertical, 
+      subvertical: $subvertical, 
+      articleType: $article, 
+      urlSlug: $urlSlug, 
+      domain: $domain,
+    }
+    stage: $stage
+    orderBy: updatedAt_DESC
+  ) {
+    id
+    urlSlug
+    title
+    secondaryImage {
+      url
+    }
+    articleType
+    readTime
+    publishedAt
+    excerpt
+    date
+    coverImage {
+      url
+    }
+    contentTag {
+      id
+    }
+    content {
+      html
+    }
+    locationTags
+  }
+  relatedArticles: articles(
+    where: {
+        		OR: [{ locationTags_contains_some: $targetedLocation }, { locationTags: [] }]
+      vertical: $vertical, subvertical: $subvertical, articleType: article, domain: $domain, NOT: {urlSlug: $urlSlug}}
+    first: 100
+    stage: $stage
+  ) {
+    id
+    urlSlug
+    title
+    readTime
+    publishedAt
+    excerpt
+    date
+    coverImage {
+      url
+    }
+    locationTags
+  
+  }`;
+    const variables = {
+      stage: "DRAFT",
+      vertical: this.vertical,
+      subvertical: this.subvertical,
+      article: this.articleType,
+      targetedLocation: this.targetedLocations
+        ? this.targetedLocations.map((loc) => loc.toLowerCase())
+        : null,
+      urlSlug: slug,
+    };
+    const hygraphResp = await this.fetchHandler(this.query, variables);
     if (hygraphResp.data.articles[0].contentTag.length > 0) {
       this.relatedArticlesQuery = `query GetRelatedArticles {
         articles(

@@ -105,13 +105,17 @@ export class ArticleGrid extends ArticleController {
     }
   }
   async build() {
-    this.domain = this.transformDomainToHygraphAPIRef();
-    this.query = `query GetAllArticles {
-                        articles(
-                          stage: DRAFT
-                          first: 20
-                          orderBy: date_ASC
-                          where: {vertical: "${this.vertical}", subvertical: "${this.subvertical}", articleType: ${this.articleType}, domain: ${this.domain}}
+    this.query = `query GetAllArticles($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
+                          articles(
+                            stage: $stage
+                            orderBy: date_ASC
+                            where: {
+                            OR: [{ locationTags_contains_some: $targetedLocation }, { locationTags: [] }],
+                              vertical: $vertical, 
+                              subvertical: $subvertical, 
+                              articleType: $article, 
+                              domain: $domain,
+                            }
                         ) {
                           id
                           urlSlug
@@ -119,7 +123,7 @@ export class ArticleGrid extends ArticleController {
                           secondaryImage {
                             url
                           }
-                          contentTag {
+                          contentTag(first: 5)  {
                             tagValue
                           }
                           readTime
@@ -134,19 +138,22 @@ export class ArticleGrid extends ArticleController {
                           }
                         }
                       }`;
+    const variables = {
+      stage: "DRAFT",
+      vertical: this.vertical,
+      subvertical: this.subvertical,
+      article: this.articleType,
+    };
     if (this.tag) {
       this.query = `query GetArticlesByTag {
         articles(
           stage: DRAFT
           first: 20
           orderBy: date_ASC
-          where: {NOT: {urlSlug: "${
-            articleRefs.getInstance(Article).urlSlug
-          }"}, vertical: "${this.vertical}", subvertical: "${
-        this.subvertical
-      }", articleType: ${this.articleType}, domain: ${
-        this.domain
-      }, contentTag_some: {tagValue: "${this.tag}"}}
+          where: {NOT: {urlSlug: 
+          $urlSlug}, vertical: $vertical, subvertical: $subvertical
+      }", articleType: $articleType, domain: $domain
+      }, contentTag_some: {tagValue: $tag}}
         ) {
           id
           urlSlug
@@ -169,13 +176,13 @@ export class ArticleGrid extends ArticleController {
           }
         }
       }`;
-      const tagsArticlesResp = await this.fetchHandler(this.query);
+      const tagsArticlesResp = await this.fetchHandler(this.query, variables);
       this.articles = tagsArticlesResp.data.articles;
     } else {
       //if we didn't get passed data, fetch it with the query
       //else we can assume we are building from related articles
       if (!this.articles) {
-        const allArticlesResp = await this.fetchHandler(this.query);
+        const allArticlesResp = await this.fetchHandler(this.query, variables);
         this.articles = allArticlesResp.data.articles;
       }
     }

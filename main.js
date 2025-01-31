@@ -111,9 +111,11 @@ export const createNoArticlesMessage = (
   container.prepend(message);
 };
 
-export const uppercaseTagValue = (tag) =>
-  tag.charAt(0).toUpperCase() + tag.slice(1);
-
+export const uppercaseTagValue = (tag) => {
+  if (tag) {
+    return tag.charAt(0).toUpperCase() + tag.slice(1);
+  }
+};
 export const createBackButton = (articleConfig) => {
   if (!document.querySelector(".articles-back-btn")) {
     const back = createNode("button", {
@@ -210,6 +212,7 @@ export const watchForHistoryChange = (callback) => {
 };
 
 window.initializeArticles = async (config) => {
+  console.log(config);
   impressureRouteFromUrl = config.impressureRouteFromUrl;
   //SETLOADIN(TRUE)
   //user navigating to specific article page

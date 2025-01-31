@@ -11,6 +11,7 @@ export class ArticleController {
     this.domain = config.domain;
     this.hostname = config.domain;
     this.gaId = config.gaId;
+    this.targetedLocations = config.targetedLocations;
     this.analytics = {
       events: {
         view: (title) => {
@@ -24,11 +25,11 @@ export class ArticleController {
             event: "articleConversion",
             articleTitle: title,
           });
-        }
+        },
       },
       createConversionTracker: () => {
         const links = document.querySelectorAll(`a[href*="${this.hostname}"]`);
-        links.forEach(link => {
+        links.forEach((link) => {
           link.addEventListener("click", (event) => {
             event.preventDefault();
             this.analytics.events.conversion(this.article.title);
@@ -39,10 +40,12 @@ export class ArticleController {
       init: () => {
         window.dataLayer = window.dataLayer || [];
         this.analytics.createConversionTracker();
-      }
-    }
+      },
+    };
   }
-  async fetchHandler(query) {
+  async fetchHandler(query, variables) {
+    if (variables) variables.domain = this.transformDomainToHygraphAPIRef();
+    console.log(variables);
     const resp = await fetch(this.apiUrl, {
       method: "POST",
       headers: {
@@ -50,28 +53,35 @@ export class ArticleController {
       },
       body: JSON.stringify({
         query: query,
+        variables: variables,
       }),
     });
-    if (!resp.ok) throw new Error("Article Creation: hygraph fetch failed");
+    if (!resp.ok) {
+      const r = await resp.json();
+      console.log(r?.errors);
+      throw new Error(`Article Creation: hygraph fetch failed, 
+        
+        ${r?.errors[0]?.message}`);
+    }
     const json = await resp.json();
     return json;
   }
   trimExcerpt = (text) => {
     const trimIndex = 132;
-    if(text.length > trimIndex){
+    if (text.length > trimIndex) {
       const findIndexOfNextSpace = () => {
         //look from trim index to the end to find next space
-        for (let i = trimIndex; i < text.length - 1; i++){
-          if (text[i] === " "){
+        for (let i = trimIndex; i < text.length - 1; i++) {
+          if (text[i] === " ") {
             return i;
           }
         }
-      }
+      };
       //return truncated string sliced down to nearest space, and append ellipsis
-      return text.slice(0,findIndexOfNextSpace()) + "...";
+      return text.slice(0, findIndexOfNextSpace()) + "...";
     }
     return text;
-  }
+  };
   transformDomainToHygraphAPIRef() {
     switch (this.domain) {
       case "findhomepros.com":
