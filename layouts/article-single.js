@@ -55,8 +55,22 @@ export class Article extends ArticleController {
     const buildArticleAndAppend = (articleObj) => {
       const html = createNode("div", { class: "article-content" });
       html.innerHTML = articleObj.content.html;
+      const cta = [...html.querySelectorAll("a")]
+        .map((tag) => {
+          const possibleCtaArray = ["compare rates", "compare quotes"];
+          console.log(tag.textContent.toLowerCase().replaceAll(">", ""));
+          let text = tag.textContent.toLowerCase().replaceAll(">", "");
+          if (text[text.length - 1] === " ") text = text.slice(0, -1);
+          if (possibleCtaArray.includes(text)) {
+            return tag;
+          }
+        })
+        .filter((cta) => cta);
+      cta.forEach((a) => {
+        a.classList.add("btn", "btn-primary");
+      });
       const title = createNode("h2", { class: "article-title" });
-      title.textContent = articleObj.title;
+      title.textContent = this.substitution(articleObj.title);
       const image = createNode("img", {
         class: "article-cover-img",
         style: "max-width:100%;width:100%;display:block",
@@ -104,11 +118,10 @@ export class Article extends ArticleController {
     watchForHistoryChange(this.events.historyChange);
   }
   async build({ slug, tags } = eventDetails) {
-    this.domain = this.transformDomainToHygraphAPIRef();
     this.urlSlug = slug;
     this.relatedArticles = null;
     //query needs to be updated to include tags if they are present
-    this.query = `getArticleWithRelated($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $urlSlug: String, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
+    this.query = `query getArticleWithRelated($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $urlSlug: String, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
   article: articles(
     where: {
       vertical: $vertical, 
@@ -134,8 +147,9 @@ export class Article extends ArticleController {
     coverImage {
       url
     }
-    contentTag {
+    contentTag(first: 5) {
       id
+      tagValue
     }
     content {
       html
@@ -160,7 +174,7 @@ export class Article extends ArticleController {
       url
     }
     locationTags
-  
+  }
   }`;
     const variables = {
       stage: "DRAFT",
@@ -171,9 +185,10 @@ export class Article extends ArticleController {
         ? this.targetedLocations.map((loc) => loc.toLowerCase())
         : null,
       urlSlug: slug,
+      domain: this.domain,
     };
     const hygraphResp = await this.fetchHandler(this.query, variables);
-    if (hygraphResp.data.articles[0].contentTag.length > 0) {
+    if (hygraphResp.data.article[0].contentTag.length > 0) {
       this.relatedArticlesQuery = `query GetRelatedArticles {
         articles(
           stage: DRAFT
@@ -212,8 +227,11 @@ export class Article extends ArticleController {
         }
       }`;
     }
-    this.article = hygraphResp.data.articles[0];
-    this.relatedArticles = await this.fetchHandler(this.relatedArticlesQuery);
+    this.article = hygraphResp.data.article[0];
+    this.relatedArticles = await this.fetchHandler(
+      this.relatedArticlesQuery,
+      variables
+    );
     this.buildArticle(this.article);
   }
 }

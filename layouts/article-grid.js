@@ -58,7 +58,7 @@ export class ArticleGrid extends ArticleController {
       const excerpt = createNode("p", { class: "article-excerpt" });
       excerpt.textContent = this.trimExcerpt(articleObj.excerpt);
       const title = createNode("h2", { class: "article-title" });
-      title.textContent = articleObj.title;
+      title.textContent = this.substitution(articleObj.title);
       const publishedDate = createNode("p", {
         class: "article-date article-metadata",
       });
@@ -143,6 +143,7 @@ export class ArticleGrid extends ArticleController {
       vertical: this.vertical,
       subvertical: this.subvertical,
       article: this.articleType,
+      domain: this.domain,
     };
     if (this.tag) {
       this.query = `query GetArticlesByTag {

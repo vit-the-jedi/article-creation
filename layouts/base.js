@@ -44,7 +44,6 @@ export class ArticleController {
     };
   }
   async fetchHandler(query, variables) {
-    if (variables) variables.domain = this.transformDomainToHygraphAPIRef();
     console.log(variables);
     const resp = await fetch(this.apiUrl, {
       method: "POST",
@@ -97,5 +96,23 @@ export class ArticleController {
       default:
         throw new Error("Article Creation: Domain not found/invalid");
     }
+  }
+  substitution(content, definitions = []) {
+    let modifiedContent = content;
+    if (content) {
+      if (definitions.length === 0) {
+        definitions.push({
+          variable: "year",
+          value: new Date().getFullYear(),
+        });
+      }
+      definitions.forEach((definition) => {
+        modifiedContent = content.replace(/{{\s*(\w+)\s*}}/g, (_, subKey) => {
+          console.log(_, subKey);
+          return definition.value || "";
+        });
+      });
+    }
+    return modifiedContent;
   }
 }
