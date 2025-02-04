@@ -89,20 +89,33 @@ body.articles-loading .articles-container {
   border-bottom: 2px solid var(--mainColor);
   display: inline;
 }
-.articles-container .back-btn {
+.articles-container .btn {
   margin: 20px auto 100px auto;
   display: block;
   background: none;
   border: none;
   max-width: 225px;
   width: 60%;
-  color: white;
   background-color: var(--mainColor);
+  color: white;
   padding: 10px 15px;
   text-transform: uppercase;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+}
+.articles-container .btn * {
+  color: #fff;
+}
+/* uncomment for different arrows on cta */
+/* .articles-container .btn.btn-primary::after {
+  content: "\279C";
+  margin-right: 10px;
+  max-width: 20px;
+  display: inline-block;
+} */
+.articles-container .back-btn {
+  background-color: var(--secondaryColor);
 }
 .articles-container .back-btn::before {
   content: "\279C";

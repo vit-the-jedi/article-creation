@@ -120,7 +120,7 @@ export const createBackButton = (articleConfig) => {
   if (!document.querySelector(".articles-back-btn")) {
     const back = createNode("button", {
       type: "button",
-      class: "back-btn articles-back-btn",
+      class: "btn back-btn articles-back-btn",
     });
     back.textContent = "Back to Articles";
     back.addEventListener("click", function (ev) {
@@ -208,6 +208,8 @@ const getSlugFromUrl = () => {
 };
 
 export const watchForHistoryChange = (callback) => {
+  console.log("watchForHistoryChange");
+  console.log(callback);
   window.addEventListener("popstate", callback);
 };
 
