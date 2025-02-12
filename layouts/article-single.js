@@ -13,7 +13,24 @@ export class Article extends ArticleController {
   constructor(config = null) {
     super(config);
     this.article = {};
+    this.urlSlug = "";
+    this.loading = true;
+    this.error = false;
     this.__effects = {
+      urlSlug: {
+        getNewArticle: async () => {
+          const articleResp = await this.fetchHandler(
+            this.__query,
+            this.__queryVariables
+          );
+          if (articleResp.errors) {
+            this.error = true;
+          } else {
+            this.error = false;
+            this.article = articleResp.data.article[0];
+          }
+        },
+      },
       article: {
         createArticleUrl: () => {
           window.history.pushState({}, "", `/article/${this.article.urlSlug}`);
@@ -85,6 +102,69 @@ export class Article extends ArticleController {
           // watchForHistoryChange(this.events.historyChange);
         },
       },
+    };
+    this.__query = `query getArticleWithRelated($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $urlSlug: String, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
+      article: articles(
+        where: {
+          vertical: $vertical, 
+          subvertical: $subvertical, 
+          articleType: $article, 
+          urlSlug: $urlSlug, 
+          domain: $domain,
+        }
+        stage: $stage
+        orderBy: updatedAt_DESC
+      ) {
+        id
+        urlSlug
+        title
+        secondaryImage {
+          url
+        }
+        articleType
+        readTime
+        publishedAt
+        excerpt
+        date
+        coverImage {
+          url
+        }
+        contentTag(first: 5) {
+          id
+          tagValue
+        }
+        content {
+          html
+        }
+        locationTags
+      }
+      relatedArticles: articles(
+        where: {
+                OR: [{ locationTags_contains_some: $targetedLocation }, { locationTags: [] }]
+          vertical: $vertical, subvertical: $subvertical, articleType: article, domain: $domain, NOT: {urlSlug: $urlSlug}}
+        first: 100
+        stage: $stage
+      ) {
+        id
+        urlSlug
+        title
+        readTime
+        publishedAt
+        excerpt
+        date
+        coverImage {
+          url
+        }
+        locationTags
+      }
+    }`;
+    this.__queryVariables = {
+      stage: "DRAFT",
+      vertical: "insurance",
+      subvertical: "auto-insurance",
+      article: "article",
+      domain: "freeInsuranceQuotesUs",
+      urlSlug: this.urlSlug,
     };
     this.events = {
       tagClick: (ev) => {

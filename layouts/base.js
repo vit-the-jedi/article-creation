@@ -66,6 +66,29 @@ export class ArticleController {
         throw new Error("Article Creation: Domain not found/invalid");
     }
   }
+  async fetchHandler(query, variables) {
+    const resp = await fetch(
+      "https://us-west-2.cdn.hygraph.com/content/ckwzg7tk528a001z4e7z0bqi0/master",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: query,
+          variables: variables,
+        }),
+      }
+    );
+    if (!resp.ok) {
+      const r = await resp.json();
+      console.log(r?.errors);
+      throw new Error(`Article Creation: hygraph fetch failed, 
+        ${r?.errors[0]?.message}`);
+    }
+    const json = await resp.json();
+    return json;
+  }
   substitution(content, definitions = []) {
     let modifiedContent = content;
     if (content) {

@@ -122,17 +122,12 @@ const getSlugFromUrl = () => {
   }
 };
 
-window.initializeArticles = async (type, data) => {
-  window.__articlesData__ = {};
-  window.__articlesData__.articleSingle = reactive(new Article());
-  window.__articlesData__.articleGrid = reactive(new ArticleGrid());
-  console.log(window.__articlesData__.articleSingle);
-  console.log(window.__articlesData__.articleGrid);
-  if (type === "article") {
-    //single article logic
-    window.__articlesData__.articleSingle.article = data;
+window.initializeArticles = async (page) => {
+  const articleSingle = reactive(new Article());
+  const articleGrid = reactive(new ArticleGrid());
+  if (!page || page === "articles") {
+    articleGrid.fetch = true;
   } else {
-    //grid logic
-    window.__articlesData__.articleGrid.articles = data;
+    articleSingle.urlSlug = getSlugFromUrl();
   }
 };

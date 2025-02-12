@@ -14,8 +14,27 @@ export class ArticleGrid extends ArticleController {
   constructor(config = null) {
     super(config);
     this.articles = [];
+    this.loading = true;
+    this.error = false;
     this.gridTitle = "Latest Articles";
+    this.fetch = false;
     this.__effects = {
+      fetch: {
+        fetchOnInit: async () => {
+          if (this.fetch) {
+            const allArticlesResp = await this.fetchHandler(
+              this.__query,
+              this.__queryVariables
+            );
+            if (allArticlesResp.errors) {
+              this.error = true;
+            } else {
+              this.error = false;
+              this.articles = allArticlesResp.data.articles;
+            }
+          }
+        },
+      },
       articles: {
         createArticleGridUrl: () => {
           window.history.pushState({}, "", "/articles");
@@ -78,34 +97,68 @@ export class ArticleGrid extends ArticleController {
         },
       },
     };
+    this.__query = `query GetAllArticles($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
+      articles(
+        stage: $stage
+        orderBy: date_ASC
+        where: {
+        OR: [{ locationTags_contains_some: $targetedLocation }, { locationTags: [] }],
+          vertical: $vertical, 
+          subvertical: $subvertical, 
+          articleType: $article, 
+          domain: $domain,
+        }
+    ) {
+      id
+      urlSlug
+      title
+      secondaryImage {
+        url
+      }
+      contentTag(first: 5)  {
+        tagValue
+      }
+      readTime
+      publishedAt
+      excerpt
+      date
+      coverImage {
+        url
+      }
+      content {
+        html
+      }
+    }
+  }`;
+    this.__variables = {
+      stage: "DRAFT",
+      vertical: "insurance",
+      subvertical: "auto-insurance",
+      article: "article",
+      domain: "freeInsuranceQuotesUs",
+    };
     this.events = {
       click: (ev) => {
         utilities.setArticleLoadingState(true);
+        const pageState = Impressure.context.getState();
         const parentElement = ev.target.closest(".article-card");
-        const newArticleFromState = this.articles.find(
+        window.__articlesData__.articleSingle.slug = this.articles.find(
           (article) => article.id === parentElement.id
         );
-        const newArticleSlug = newArticleFromState.urlSlug;
-        if (!window.location.hostname.includes("preview")) {
-          window.location.href = `article/${newArticleSlug}`;
+        window.history.pushState({}, "", `/article/${newArticleSlug}`);
+        if (
+          pageState.pages[pageState.navigation.currentPageId].name !== "article"
+        ) {
+          Impressure.commands.nextPage();
         } else {
-          const pageState = Impressure.context.getState();
-          window.__articlesData__.articleSingle.slug = newArticleSlug;
-          if (
-            pageState.pages[pageState.navigation.currentPageId].name !==
-            "article"
-          ) {
-            Impressure.commands.nextPage();
-          } else {
-            document.querySelector(".regionHeader").scrollIntoView();
-            document.querySelector(
-              ".articles-container.single > .wrapper"
-            ).innerHTML = "";
-            document.querySelector(
-              ".articles-container.grid > .wrapper"
-            ).innerHTML = "";
-            Impressure.commands.processIntegrations();
-          }
+          document.querySelector(".regionHeader").scrollIntoView();
+          document.querySelector(
+            ".articles-container.single > .wrapper"
+          ).innerHTML = "";
+          document.querySelector(
+            ".articles-container.grid > .wrapper"
+          ).innerHTML = "";
+          Impressure.commands.processIntegrations();
         }
       },
     };
