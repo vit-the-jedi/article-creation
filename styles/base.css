@@ -57,7 +57,6 @@ body.articles-loading .articles-container {
 .article-card {
   background-color: white;
   color: #fff;
-  border-radius: 5px;
   padding: 10px;
   font-size: 150%;
   display: flex;

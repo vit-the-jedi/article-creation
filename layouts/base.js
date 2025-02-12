@@ -1,17 +1,8 @@
 "use strict";
 
-import { articleRefs } from "../main";
-
 export class ArticleController {
   constructor(config) {
-    this.vertical = config.vertical;
-    this.subvertical = config.subvertical;
-    this.articleType = config.articleType;
-    this.apiUrl = config.apiUrl;
-    this.domain = config.domain;
-    this.hostname = config.domain;
-    this.gaId = config.gaId;
-    this.targetedLocations = config.targetedLocations;
+    //this.gaId = config.gaId;
     this.analytics = {
       events: {
         view: (title) => {
@@ -42,28 +33,6 @@ export class ArticleController {
         this.analytics.createConversionTracker();
       },
     };
-  }
-  async fetchHandler(query, variables) {
-    console.log(variables);
-    const resp = await fetch(this.apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        variables: variables,
-      }),
-    });
-    if (!resp.ok) {
-      const r = await resp.json();
-      console.log(r?.errors);
-      throw new Error(`Article Creation: hygraph fetch failed, 
-        
-        ${r?.errors[0]?.message}`);
-    }
-    const json = await resp.json();
-    return json;
   }
   trimExcerpt = (text) => {
     const trimIndex = 132;

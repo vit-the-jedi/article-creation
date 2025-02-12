@@ -4,97 +4,12 @@ import { Article } from "./layouts/article-single";
 import { ArticleGrid } from "./layouts/article-grid";
 import "./styles/base.css";
 
+import * as lightweight_reactivity from "@vit-the-jedi-tools/lightweight-reactivity";
+
+const reactive = lightweight_reactivity.reactive;
+
 let impressureRouteFromUrl;
-
-class InstanceStore {
-  constructor() {
-    this.store = new Map();
-  }
-
-  // Store an instance by class constructor
-  storeInstance(cls, instance) {
-    this.store.set(cls, instance); // cls is the key, instance is the value
-  }
-
-  // Retrieve an instance by class constructor
-  getInstance(cls) {
-    return this.store.get(cls);
-    // cls is the key, get the corresponding value (instance)
-  }
-
-  deleteInstance(cls) {
-    this.store.delete(cls);
-  }
-  state() {
-    return this.store;
-  }
-}
-
-export const articleRefs = new InstanceStore();
 const i = 0;
-
-export const createArticleHandler = async (articleConfig, eventDetails) => {
-  document.body.classList.add("articles-loading");
-  document.querySelector(".articles-container.single").prepend(createLoader());
-  createArticleUrl(eventDetails.slug);
-  const articleInstance = new Article(articleConfig);
-  await articleInstance.build(eventDetails);
-  articleRefs.storeInstance(Article, articleInstance);
-  const relatedArticles =
-    articleRefs.getInstance(Article).relatedArticles.data.articles;
-  if (relatedArticles.length > 0) {
-    createArticleGridHandler(
-      articleConfig,
-      relatedArticles,
-      "Related Articles"
-    );
-  } else {
-    articleRefs.deleteInstance(ArticleGrid);
-    updateGridTitle("");
-  }
-  removeLoader();
-  articleInstance.analytics.init();
-  articleInstance.analytics.events.view(
-    articleRefs.getInstance(Article).article.title
-  );
-};
-
-export const createArticleGridHandler = async (
-  articleConfig,
-  relatedArticles,
-  gridTitle
-) => {
-  document.querySelector(".articles-container.grid").prepend(createLoader());
-  if (relatedArticles) {
-    const articleGridInstanceWithRelated = new ArticleGrid(
-      articleConfig,
-      relatedArticles
-    );
-    await articleGridInstanceWithRelated.build();
-    articleRefs.storeInstance(ArticleGrid, articleGridInstanceWithRelated);
-  } else {
-    const articleGridInstance = new ArticleGrid(articleConfig);
-    await articleGridInstance.build();
-    articleRefs.storeInstance(ArticleGrid, articleGridInstance);
-  }
-  updateGridTitle(gridTitle);
-  removeLoader();
-};
-
-//destroy article instance and remove from map
-//need to call this for each instance on the map
-export const destroyArticle = (articleRef, container) => {
-  articleRefs.deleteInstance(articleRef);
-  container.innerHTML = "";
-};
-
-const createArticleUrl = (slug) => {
-  window.history.pushState({}, "", `/article/${slug}`);
-};
-
-const resetArticleUrl = () => {
-  window.history.pushState({}, "", "/articles");
-};
 
 export const scrollToHeader = () => {
   const pageHeader =
@@ -207,56 +122,17 @@ const getSlugFromUrl = () => {
   }
 };
 
-export const watchForHistoryChange = (callback) => {
-  console.log("watchForHistoryChange");
-  console.log(callback);
-  window.addEventListener("popstate", callback);
-};
-
-window.initializeArticles = async (config) => {
-  console.log(config);
-  impressureRouteFromUrl = config.impressureRouteFromUrl;
-  //SETLOADIN(TRUE)
-  //user navigating to specific article page
-  //fetch specific article based onn route, else show all articles for domain
-  document.addEventListener("createArticle", (e) => {
-    createArticleHandler(config, e.detail);
-    createBackButton(config);
-  });
-  document.addEventListener("createArticleGrid", (e) => {
-    console.log(`createArticleGrid event`, e.detail);
-    let title;
-    if (e?.detail?.tag) {
-      config.tag = e.detail.tag;
-      title = uppercaseTagValue(e.detail.tag) + " Articles";
-    } else {
-      title = "Latest Articles";
-    }
-    createArticleGridHandler(config, null, title);
-    createBackButton(config);
-  });
-  document.addEventListener("removeArticlesBackButton", () => {
-    const backBtn = document.querySelector(".articles-back-btn");
-    const c = document.querySelector(".articles-container.grid");
-    c.removeChild(backBtn);
-  });
-  if (
-    window.location.pathname.split("/")[1] === "article" ||
-    impressureRouteFromUrl === "article"
-  ) {
-    const slug =
-      impressureRouteFromUrl === "article"
-        ? "best-free-cheap-auto-insurance-in-affordable-options-for-2024"
-        : getSlugFromUrl();
-    if (slug) {
-      createArticleHandler(config, { slug: slug, tags: null });
-      createBackButton(config);
-    } else {
-      console.warn(`No slug found in URL, redirecting to articles`);
-      resetArticleUrl();
-      createArticleGridHandler(config, null, "Latest Articles");
-    }
+window.initializeArticles = async (type, data) => {
+  window.__articlesData__ = {};
+  window.__articlesData__.articleSingle = reactive(new Article());
+  window.__articlesData__.articleGrid = reactive(new ArticleGrid());
+  console.log(window.__articlesData__.articleSingle);
+  console.log(window.__articlesData__.articleGrid);
+  if (type === "article") {
+    //single article logic
+    window.__articlesData__.articleSingle.article = data;
   } else {
-    createArticleGridHandler(config, null, "Latest Articles");
+    //grid logic
+    window.__articlesData__.articleGrid.articles = data;
   }
 };

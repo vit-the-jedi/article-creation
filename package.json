@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "@vit-the-jedi-tools/lightweight-reactivity": "npm:@jsr/vit-the-jedi-tools__lightweight-reactivity@^1.1.0"
   }
 }
