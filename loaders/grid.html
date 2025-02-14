@@ -1,0 +1,89 @@
+<template id="articles-loader">
+  <div id="skeleton-articles">
+    <style>
+      @keyframes loadingUI {
+        0% {
+          background-position: -200px 0;
+        }
+        100% {
+          background-position: 200px 0;
+        }
+      }
+
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #eae7e7 25%,
+          #f7f6f6 50%,
+          #eae7e7 75%
+        );
+        background-size: 200% 100%;
+        animation: loadingUI 1.5s infinite linear;
+        border-radius: 8px;
+      }
+
+      .skeleton-articles-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .skeleton-article {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-radius: 10px;
+        padding: 15px;
+        cursor: wait;
+      }
+
+      .skeleton-image {
+        width: 100%;
+        height: 150px;
+        border-radius: 8px;
+      }
+
+      .skeleton-title {
+        height: 20px;
+        width: 80%;
+      }
+
+      .skeleton-text {
+        height: 12px;
+        width: 100%;
+      }
+
+      .skeleton-button {
+        height: 30px;
+        width: 50%;
+        align-self: flex-start;
+      }
+    </style>
+
+    <div class="skeleton-articles-container">
+      <script>
+        {
+          const limit = 9; // Number of articles in the image
+          const container = document.querySelector(
+            ".skeleton-articles-container"
+          );
+          for (let i = 0; i < limit; i++) {
+            const article = document.createElement("div");
+            article.classList.add("skeleton-article");
+            article.innerHTML = `
+              <div class="skeleton skeleton-image"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-button"></div>
+            `;
+            container.appendChild(article);
+          }
+        }
+      </script>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,69 @@
+<template id="articles-loader">
+  <div id="skeleton-article-detail">
+    <style>
+      @keyframes loadingUI {
+        0% {
+          background-position: -200px 0;
+        }
+        100% {
+          background-position: 200px 0;
+        }
+      }
+
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #eae7e7 25%,
+          #f7f6f6 50%,
+          #eae7e7 75%
+        );
+        background-size: 200% 100%;
+        animation: loadingUI 1.5s infinite linear;
+        border-radius: 8px;
+      }
+
+      .skeleton-article-container {
+        width: 80%;
+        max-width: 800px;
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .skeleton-image {
+        width: 100%;
+        height: 200px;
+        border-radius: 8px;
+      }
+
+      .skeleton-title {
+        height: 24px;
+        width: 60%;
+      }
+
+      .skeleton-paragraph {
+        height: 12px;
+        width: 100%;
+      }
+
+      .skeleton-button {
+        height: 40px;
+        width: 50%;
+        align-self: center;
+      }
+    </style>
+
+    <div class="skeleton-article-container">
+      <div class="skeleton skeleton-image"></div>
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-button"></div>
+    </div>
+  </div>
+</template>

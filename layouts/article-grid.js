@@ -1,7 +1,7 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import { Article } from "./article-single.js";
+import { articleSingle, loader } from "../main.js";
 import {
   scrollToHeader,
   createNode,
@@ -15,16 +15,23 @@ export class ArticleGrid extends ArticleController {
     super(config);
     this.articles = [];
     this.loading = true;
-    this.error = false;
+    this.error = null;
     this.gridTitle = "Latest Articles";
     this.fetch = false;
     this.__effects = {
       fetch: {
-        fetchOnInit: async () => {
+        fetchOnInit: async function () {
           if (this.fetch) {
+            const variables = {
+              stage: "DRAFT",
+              vertical: "insurance",
+              subvertical: "auto-insurance",
+              article: "article",
+              domain: "freeInsuranceQuotesUs",
+            };
             const allArticlesResp = await this.fetchHandler(
               this.__query,
-              this.__queryVariables
+              variables
             );
             if (allArticlesResp.errors) {
               this.error = true;
@@ -33,13 +40,26 @@ export class ArticleGrid extends ArticleController {
               this.articles = allArticlesResp.data.articles;
             }
           }
+          this.fetch = false;
         },
       },
       articles: {
-        createArticleGridUrl: () => {
-          window.history.pushState({}, "", "/articles");
+        // createLoader: function () {
+        //   loader.layout = "grid";
+        //   loader.loading = true;
+        // },
+        createArticleGridUrl: function () {
+          if (this.fetch) {
+            window.history.pushState({}, "", "/articles");
+          }
         },
-        buildArticleGrid: () => {
+        buildArticleGrid: function () {
+          const articleGridContainer = createNode("div", {
+            class: "article-grid-container",
+          });
+          const articleGrid = createNode("div", {
+            class: "article-container article-grid grid",
+          });
           const buildGridOfArticles = (articleObj) => {
             const excerpt = createNode("p", { class: "article-excerpt" });
             excerpt.textContent = this.trimExcerpt(articleObj.excerpt);
@@ -71,10 +91,9 @@ export class ArticleGrid extends ArticleController {
             });
             continueReadingLink.textContent = "Continue Reading";
             articleLink.addEventListener("click", this.events.click);
-            const articleContainer = document.querySelector(
-              ".articles-container.grid > .wrapper"
-            );
-            articleContainer.classList.add("article-grid");
+            const articleContainer = createNode("div", {
+              class: "article-item",
+            });
             if (articleObj?.coverImage?.url) imageContainer.appendChild(image);
             articleLink.appendChild(imageContainer);
             articleLink.appendChild(title);
@@ -83,14 +102,40 @@ export class ArticleGrid extends ArticleController {
             articleLink.appendChild(continueReadingLink);
             articleContent.appendChild(articleLink);
             articleContainer.append(articleContent);
+            return articleContainer;
           };
-          for (const article of this.articles) {
-            buildGridOfArticles(article);
+
+          const createdArticles = this.articles.map((article) => {
+            return buildGridOfArticles(article);
+          });
+          createdArticles.forEach((article) => {
+            articleGrid.appendChild(article);
+          });
+          loader.loading = false;
+          try {
+            articleGridContainer.appendChild(articleGrid);
+            document
+              .querySelector(".articles-append-target")
+              .appendChild(articleGridContainer);
+            this.gridTitle = "Latest Articles";
+          } catch (e) {
+            throw new Error(
+              'Articles append failure: element with selector ".articles-append-target" not found'
+            );
           }
+        },
+        createGridTitle: function () {
+          const articleGridTitle = createNode("div", {
+            class: "article-grid-title",
+          });
+          articleGridTitle.innerHTML = `<h3 style="text-align:center">${this.gridTitle}</h3>`;
+          document
+            .querySelector(".article-grid")
+            .parentNode.prepend(articleGridTitle);
         },
       },
       gridTitle: {
-        updateGridTitle: () => {
+        updateGridTitle: function () {
           document.querySelector(
             ".article-grid-title"
           ).innerHTML = `<h3 style="text-align:center">${this.gridTitle}</h3>`;
@@ -112,12 +157,6 @@ export class ArticleGrid extends ArticleController {
       id
       urlSlug
       title
-      secondaryImage {
-        url
-      }
-      contentTag(first: 5)  {
-        tagValue
-      }
       readTime
       publishedAt
       excerpt
@@ -125,41 +164,20 @@ export class ArticleGrid extends ArticleController {
       coverImage {
         url
       }
-      content {
-        html
-      }
     }
   }`;
-    this.__variables = {
-      stage: "DRAFT",
-      vertical: "insurance",
-      subvertical: "auto-insurance",
-      article: "article",
-      domain: "freeInsuranceQuotesUs",
-    };
     this.events = {
       click: (ev) => {
-        utilities.setArticleLoadingState(true);
-        const pageState = Impressure.context.getState();
-        const parentElement = ev.target.closest(".article-card");
-        window.__articlesData__.articleSingle.slug = this.articles.find(
-          (article) => article.id === parentElement.id
+        document.querySelector(".regionHeader").scrollIntoView();
+        const articleGridContainer = document.querySelector(
+          ".articles-append-target"
         );
-        window.history.pushState({}, "", `/article/${newArticleSlug}`);
-        if (
-          pageState.pages[pageState.navigation.currentPageId].name !== "article"
-        ) {
-          Impressure.commands.nextPage();
-        } else {
-          document.querySelector(".regionHeader").scrollIntoView();
-          document.querySelector(
-            ".articles-container.single > .wrapper"
-          ).innerHTML = "";
-          document.querySelector(
-            ".articles-container.grid > .wrapper"
-          ).innerHTML = "";
-          Impressure.commands.processIntegrations();
-        }
+        articleGridContainer.innerHTML = "";
+        const parentElement = ev.target.closest(".article-card");
+        articleSingle.urlSlug = this.articles.find(
+          (article) => article.id === parentElement.id
+        ).urlSlug;
+        window.history.pushState({}, "", `/article/${articleSingle.urlSlug}`);
       },
     };
   }

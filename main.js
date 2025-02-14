@@ -2,11 +2,11 @@
 
 import { Article } from "./layouts/article-single";
 import { ArticleGrid } from "./layouts/article-grid";
-import "./styles/base.css";
+import { articleLoader } from "./loaders/loader.js";
 
 import * as lightweight_reactivity from "@vit-the-jedi-tools/lightweight-reactivity";
 
-const reactive = lightweight_reactivity.reactive;
+export const reactive = lightweight_reactivity.reactive;
 
 let impressureRouteFromUrl;
 const i = 0;
@@ -121,10 +121,14 @@ const getSlugFromUrl = () => {
     return null;
   }
 };
-
+export const articleSingle = reactive(new Article());
+export const articleGrid = reactive(new ArticleGrid());
+export const loader = reactive(articleLoader);
 window.initializeArticles = async (page) => {
-  const articleSingle = reactive(new Article());
-  const articleGrid = reactive(new ArticleGrid());
+  console.log(articleSingle);
+  console.log(articleGrid);
+  loader.layout = "grid";
+  loader.loading = true;
   if (!page || page === "articles") {
     articleGrid.fetch = true;
   } else {

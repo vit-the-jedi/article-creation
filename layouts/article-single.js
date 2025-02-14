@@ -1,7 +1,7 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import { ArticleGrid } from "./article-grid.js";
+import { articleGrid, loader } from "../main.js";
 import {
   createNode,
   createDate,
@@ -13,32 +13,54 @@ export class Article extends ArticleController {
   constructor(config = null) {
     super(config);
     this.article = {};
+    this.relatedArticles = [];
     this.urlSlug = "";
     this.loading = true;
     this.error = false;
     this.__effects = {
+      relatedArticles: {
+        initRelatedArticleGrid: function () {
+          articleGrid.articles = this.relatedArticles;
+          articleGrid.gridTitle = "Related Articles";
+        },
+      },
       urlSlug: {
-        getNewArticle: async () => {
-          const articleResp = await this.fetchHandler(
-            this.__query,
-            this.__queryVariables
-          );
+        createLoader: function () {
+          loader.layout = "single";
+          loader.loading = true;
+        },
+        createArticleUrl: function () {
+          window.history.pushState({}, "", `/article/${this.urlSlug}`);
+        },
+        getNewArticle: async function () {
+          const variables = {
+            stage: "DRAFT",
+            vertical: "insurance",
+            subvertical: "auto-insurance",
+            article: "article",
+            domain: "freeInsuranceQuotesUs",
+            urlSlug: this.urlSlug,
+          };
+          const articleResp = await this.fetchHandler(this.__query, variables);
           if (articleResp.errors) {
             this.error = true;
           } else {
             this.error = false;
             this.article = articleResp.data.article[0];
+            if (articleResp.data.relatedArticles.length > 0) {
+              this.relatedArticles = articleResp.data.relatedArticles;
+            }
           }
         },
       },
       article: {
-        createArticleUrl: () => {
-          window.history.pushState({}, "", `/article/${this.article.urlSlug}`);
-        },
-        buildArticle() {
-          const buildArticleAndAppend = (articleObj) => {
+        buildArticle: function () {
+          const buildArticleAndAppend = () => {
+            const articleContainer = createNode("div", {
+              class: "article-container single",
+            });
             const html = createNode("div", { class: "article-content" });
-            html.innerHTML = articleObj.content.html;
+            html.innerHTML = this.article.content.html;
             const cta = [...html.querySelectorAll("a")]
               .map((tag) => {
                 const possibleCtaArray = ["compare rates", "compare quotes"];
@@ -54,30 +76,30 @@ export class Article extends ArticleController {
               a.classList.add("btn", "btn-primary");
             });
             const title = createNode("h2", { class: "article-title" });
-            title.textContent = this.substitution(articleObj.title);
+            title.textContent = this.substitution(this.article.title);
             const image = createNode("img", {
               class: "article-cover-img",
               style: "max-width:100%;width:100%;display:block",
             });
-            image.src = articleObj?.coverImage?.url;
-            if (articleObj?.secondaryImage?.url) {
+            image.src = this.article?.coverImage?.url;
+            if (this.article?.secondaryImage?.url) {
               const secondaryImage = createNode("img", {
                 class: "article-secondary-img",
               });
-              secondaryImage.src = articleObj.secondaryImage.url;
+              secondaryImage.src = this.article.secondaryImage.url;
             }
             const date = createNode("p", {
               class: "article-date article-metadata",
             });
-            date.textContent = createDate(articleObj.date);
+            date.textContent = createDate(this.article.date);
             const articleContent = createNode("div", {
               class: "article",
-              id: articleObj.id,
+              id: this.article.id,
             });
             const articleMetadata = createNode("div", {
               class: "article-tag-container",
             });
-            articleObj.contentTag.forEach((tag) => {
+            this.article.contentTag.forEach((tag) => {
               const tagNode = createNode("span", {
                 class: "article-tag article-metadata",
               });
@@ -87,15 +109,18 @@ export class Article extends ArticleController {
               articleMetadata.appendChild(tagNode);
             });
             articleMetadata.prepend(date);
-            const articleContainer = document.querySelector(
-              ".articles-container.single > .wrapper"
-            );
             articleContent.appendChild(title);
-            if (articleObj?.coverImage?.url) articleContent.appendChild(image);
+            if (this.article?.coverImage?.url)
+              articleContent.appendChild(image);
             articleContent.appendChild(html);
             articleContainer.append(articleContent);
             articleContainer.append(articleMetadata);
-            //SETLOADING(FALSE)
+
+            loader.loading = false;
+
+            document
+              .querySelector(".articles-append-target")
+              .appendChild(articleContainer);
           };
           //build the one article we have
           buildArticleAndAppend(this.article);
@@ -158,14 +183,6 @@ export class Article extends ArticleController {
         locationTags
       }
     }`;
-    this.__queryVariables = {
-      stage: "DRAFT",
-      vertical: "insurance",
-      subvertical: "auto-insurance",
-      article: "article",
-      domain: "freeInsuranceQuotesUs",
-      urlSlug: this.urlSlug,
-    };
     this.events = {
       tagClick: (ev) => {
         scrollToHeader();
