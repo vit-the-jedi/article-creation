@@ -58,28 +58,12 @@ export const createBackButton = (articleConfig) => {
   }
 };
 
-const updateGridTitle = (title) => {
-  document.querySelector(
-    ".article-grid-title"
-  ).innerHTML = `<h3 style="text-align:center">${title}</h3>`;
-};
-
 export const createNode = (element, attributes) => {
   const node = document.createElement(element);
   for (const key in attributes) {
     node.setAttribute(key, attributes[key]);
   }
   return node;
-};
-
-const createLoader = () => {
-  const loader = createNode("div", { class: "loader" });
-  loader.innerHTML = `<div class="loader" style="background: url(https://impressure-c630.kxcdn.com/loading.c5de814fe527fa434435.gif) no-repeat center center / contain; height: 20px;"></div>`;
-  return loader;
-};
-const removeLoader = () => {
-  document.body.classList.remove("articles-loading");
-  document.querySelector(".loader").remove();
 };
 
 export const createDate = (hygraphDate) => {
@@ -114,8 +98,8 @@ export const createDate = (hygraphDate) => {
   } ${date.getDate()}, ${date.getFullYear()}`;
 };
 
-const getSlugFromUrl = () => {
-  if (window.location.pathname.split("/").length > 3) {
+export const getSlugFromUrl = () => {
+  if (window.location.pathname.split("/").length >= 3) {
     return window.location.pathname.split("/")[2];
   } else {
     return null;
@@ -124,14 +108,3 @@ const getSlugFromUrl = () => {
 export const articleSingle = reactive(new Article());
 export const articleGrid = reactive(new ArticleGrid());
 export const loader = reactive(articleLoader);
-window.initializeArticles = async (page) => {
-  console.log(articleSingle);
-  console.log(articleGrid);
-  loader.layout = "grid";
-  loader.loading = true;
-  if (!page || page === "articles") {
-    articleGrid.fetch = true;
-  } else {
-    articleSingle.urlSlug = getSlugFromUrl();
-  }
-};

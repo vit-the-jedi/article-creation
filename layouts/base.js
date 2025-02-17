@@ -87,6 +87,7 @@ export class ArticleController {
         ${r?.errors[0]?.message}`);
     }
     const json = await resp.json();
+    console.log("resp", json);
     return json;
   }
   substitution(content, definitions = []) {

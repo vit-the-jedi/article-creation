@@ -40,24 +40,24 @@ export class ArticleGrid extends ArticleController {
               this.articles = allArticlesResp.data.articles;
             }
           }
-          this.fetch = false;
+          console.log(this.articles);
         },
       },
       articles: {
-        // createLoader: function () {
-        //   loader.layout = "grid";
-        //   loader.loading = true;
-        // },
-        createArticleGridUrl: function () {
-          if (this.fetch) {
-            window.history.pushState({}, "", "/articles");
-          }
-        },
         buildArticleGrid: function () {
+          const articleGridTitle = createNode("div", {
+            class: "article-grid-title",
+          });
+          const articleGridText = createNode("h3", {
+            class: "article-grid-text",
+            style: "text-align:center",
+          });
+          articleGridText.textContent = this.gridTitle;
+          articleGridTitle.appendChild(articleGridText);
           const articleGridContainer = createNode("div", {
             class: "article-grid-container",
           });
-          const articleGrid = createNode("div", {
+          const articleGridNode = createNode("div", {
             class: "article-container article-grid grid",
           });
           const buildGridOfArticles = (articleObj) => {
@@ -104,41 +104,35 @@ export class ArticleGrid extends ArticleController {
             articleContainer.append(articleContent);
             return articleContainer;
           };
-
-          const createdArticles = this.articles.map((article) => {
-            return buildGridOfArticles(article);
-          });
-          createdArticles.forEach((article) => {
-            articleGrid.appendChild(article);
-          });
-          loader.loading = false;
-          try {
-            articleGridContainer.appendChild(articleGrid);
+          console.log(this.articles);
+          if (this.articles && this.articles.length > 0) {
+            const createdArticles = this.articles.map((article) => {
+              return buildGridOfArticles(article);
+            });
+            createdArticles.forEach((article) => {
+              articleGridNode.appendChild(article);
+            });
+            loader.loading = false;
+            articleGridContainer.appendChild(articleGridNode);
+            articleGridContainer.prepend(articleGridTitle);
             document
-              .querySelector(".articles-append-target")
+              ?.querySelector(".articles-append-target")
               .appendChild(articleGridContainer);
             this.gridTitle = "Latest Articles";
-          } catch (e) {
-            throw new Error(
-              'Articles append failure: element with selector ".articles-append-target" not found'
-            );
+          } else {
+            this.fetch = true;
           }
         },
-        createGridTitle: function () {
-          const articleGridTitle = createNode("div", {
-            class: "article-grid-title",
-          });
-          articleGridTitle.innerHTML = `<h3 style="text-align:center">${this.gridTitle}</h3>`;
-          document
-            .querySelector(".article-grid")
-            .parentNode.prepend(articleGridTitle);
+        createArticleGridUrl: function () {
+          if (this.fetch) {
+            window.history.pushState({}, "", "/articles");
+          }
         },
       },
       gridTitle: {
         updateGridTitle: function () {
-          document.querySelector(
-            ".article-grid-title"
-          ).innerHTML = `<h3 style="text-align:center">${this.gridTitle}</h3>`;
+          document.querySelector(".article-grid-text").textContent =
+            this.gridTitle;
         },
       },
     };
