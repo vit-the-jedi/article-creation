@@ -1,6 +1,6 @@
 "use strict";
 
-import { ArticleController } from "./base.js";
+import { ArticleController, substitution } from "./base.js";
 import { articleGrid, loader } from "../main.js";
 import {
   createNode,
@@ -33,6 +33,8 @@ export class Article extends ArticleController {
           window.history.pushState({}, "", `/article/${this.urlSlug}`);
         },
         getNewArticle: async function () {
+          loader.layout = "single";
+          loader.loading = true;
           const variables = {
             stage: "DRAFT",
             vertical: "insurance",
@@ -51,9 +53,45 @@ export class Article extends ArticleController {
               this.relatedArticles = articleResp.data.relatedArticles;
             }
           }
+          loader.loading = false;
+        },
+        initHistoryChange: function () {
+          window.addEventListener("popstate", this.events.historyChange);
         },
       },
       article: {
+        updateMetaData: function () {
+          const metaDescription =
+            document?.querySelector('meta[name="description"]') ||
+            createNode("meta", { name: "description" });
+          const metaKeywords =
+            document?.querySelector('meta[name="keywords"]') ||
+            createNode("meta", { name: "keywords" });
+          document.title = this.substitution(this.article.title);
+
+          if (
+            this.article.metaKeywords &&
+            this.article.metaKeywords.length > 0
+          ) {
+            metaKeywords.textContent = this.article.metaKeywords;
+          } else {
+            metaKeywords.textContent = this.article?.contentTag
+              .map((tag) => tag.tagValue)
+              .join(", ");
+          }
+
+          if (
+            this.article.metaDescription &&
+            this.article.metaDescription.length > 0
+          ) {
+            metaDescription.textContent = this.article.metaDescription;
+          } else {
+            metaDescription.textContent = this.article.excerpt;
+          }
+          [metaDescription, metaKeywords].forEach((meta) => {
+            document.head.appendChild(meta);
+          });
+        },
         buildArticle: function () {
           const buildArticleAndAppend = () => {
             const articleContainer = createNode("div", {
@@ -146,6 +184,8 @@ export class Article extends ArticleController {
         secondaryImage {
           url
         }
+        metaKeywords
+        metaDescription
         articleType
         readTime
         publishedAt
@@ -186,34 +226,13 @@ export class Article extends ArticleController {
     this.events = {
       tagClick: (ev) => {
         scrollToHeader();
-        destroyArticle(
-          articleRefs.getInstance(Article),
-          document.querySelector(".articles-container.single > .wrapper")
-        );
-        destroyArticle(
-          articleRefs.getInstance(ArticleGrid),
-          document.querySelector(".articles-container.grid > .wrapper")
-        );
-        const createArticleGridEvent = new CustomEvent("createArticleGrid", {
-          detail: {
-            tag: ev.target.dataset.tag,
-          },
-        });
-        document.dispatchEvent(createArticleGridEvent);
       },
       historyChange: (ev) => {
         scrollToHeader();
-        destroyArticle(
-          Article,
-          document.querySelector(".articles-container.single > .wrapper")
-        );
-        destroyArticle(
-          ArticleGrid,
-          document.querySelector(".articles-container.grid > .wrapper")
-        );
-        const createArticleGridEvent = new CustomEvent("createArticleGrid");
-        document.dispatchEvent(createArticleGridEvent);
-        document.dispatchEvent(new CustomEvent("removeArticlesBackButton"));
+        document.querySelector(".articles-append-target").innerHTML = "";
+        loader.layout = "grid";
+        loader.loading = true;
+        articleGrid.fetch = true;
         window.removeEventListener("popstate", this);
       },
     };

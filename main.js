@@ -25,7 +25,6 @@ export const createNoArticlesMessage = (
   message.textContent = msg;
   container.prepend(message);
 };
-
 export const uppercaseTagValue = (tag) => {
   if (tag) {
     return tag.charAt(0).toUpperCase() + tag.slice(1);

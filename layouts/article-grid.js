@@ -22,6 +22,8 @@ export class ArticleGrid extends ArticleController {
       fetch: {
         fetchOnInit: async function () {
           if (this.fetch) {
+            loader.layout = "grid";
+            loader.loading = true;
             const variables = {
               stage: "DRAFT",
               vertical: "insurance",
@@ -39,8 +41,9 @@ export class ArticleGrid extends ArticleController {
               this.error = false;
               this.articles = allArticlesResp.data.articles;
             }
+            this.fetch = false;
+            loader.loading = false;
           }
-          console.log(this.articles);
         },
       },
       articles: {
@@ -104,7 +107,6 @@ export class ArticleGrid extends ArticleController {
             articleContainer.append(articleContent);
             return articleContainer;
           };
-          console.log(this.articles);
           if (this.articles && this.articles.length > 0) {
             const createdArticles = this.articles.map((article) => {
               return buildGridOfArticles(article);
