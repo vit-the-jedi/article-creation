@@ -23,9 +23,11 @@ export const articleLoader = {
             .querySelector(".articles-append-target")
             .appendChild(this.node);
         } else {
-          document
-            .querySelector(".articles-append-target")
-            .removeChild(this.node);
+          setTimeout(() => {
+            document
+              .querySelector(".articles-append-target")
+              .removeChild(this.node);
+          }, 500);
         }
       },
     },
