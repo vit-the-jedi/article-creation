@@ -173,7 +173,12 @@ export class ArticleGrid extends ArticleController {
         articleSingle.urlSlug = this.articles.find(
           (article) => article.id === parentElement.id
         ).urlSlug;
-        window.history.pushState({}, "", `/article/${articleSingle.urlSlug}`);
+
+        window.history.pushState(
+          window.history.state || {},
+          `page: ${articleSingle.article.title}`,
+          `/article/${articleSingle.urlSlug}`
+        );
       },
     };
   }

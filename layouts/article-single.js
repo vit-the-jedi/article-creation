@@ -29,9 +29,6 @@ export class Article extends ArticleController {
           loader.layout = "single";
           loader.loading = true;
         },
-        createArticleUrl: function () {
-          window.history.pushState({}, "", `/article/${this.urlSlug}`);
-        },
         getNewArticle: async function () {
           loader.layout = "single";
           loader.loading = true;
@@ -91,6 +88,13 @@ export class Article extends ArticleController {
           [metaDescription, metaKeywords].forEach((meta) => {
             document.head.appendChild(meta);
           });
+        },
+        createArticleUrl: function () {
+          window.history.pushState(
+            window.history.state || {},
+            `page: ${this.article.title}`,
+            `/article/${this.urlSlug}`
+          );
         },
         buildArticle: function () {
           const buildArticleAndAppend = () => {
