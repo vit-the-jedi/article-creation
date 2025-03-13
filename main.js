@@ -1,12 +1,12 @@
 "use strict";
 
-import { Article } from "./layouts/article-single";
-import { ArticleGrid } from "./layouts/article-grid";
-import { articleLoader } from "./loaders/loader.js";
+// import { Article } from "./layouts/article-single";
+// import { ArticleGrid } from "./layouts/article-grid";
+// import { articleLoader } from "./loaders/loader.js";
 
-import * as lightweight_reactivity from "@vit-the-jedi-tools/lightweight-reactivity";
+// import * as lightweight_reactivity from "@vit-the-jedi-tools/lightweight-reactivity";
 
-export const reactive = lightweight_reactivity.reactive;
+// export const reactive = lightweight_reactivity.reactive;
 
 let impressureRouteFromUrl;
 const i = 0;
@@ -104,6 +104,6 @@ export const getSlugFromUrl = () => {
     return null;
   }
 };
-export const articleSingle = reactive(new Article());
-export const articleGrid = reactive(new ArticleGrid());
-export const loader = reactive(articleLoader);
+// export const articleSingle = reactive(new Article(config));
+// export const articleGrid = reactive(new ArticleGrid(config));
+// export const loader = reactive(articleLoader);

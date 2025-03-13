@@ -1,7 +1,7 @@
 "use strict";
 
-import { ArticleController, substitution } from "./base.js";
-import { articleGrid, loader } from "../main.js";
+import { ArticleController } from "./base.js";
+import { articleGrid, loader, userConfig } from "../init.js";
 import {
   createNode,
   createDate,
@@ -25,6 +25,11 @@ export class Article extends ArticleController {
         },
       },
       urlSlug: {
+        initConfig: function () {
+          if (!this.config) {
+            this.config = userConfig;
+          }
+        },
         createLoader: function () {
           loader.layout = "single";
           loader.loading = true;
@@ -34,10 +39,10 @@ export class Article extends ArticleController {
           loader.loading = true;
           const variables = {
             stage: "DRAFT",
-            vertical: "insurance",
-            subvertical: "auto-insurance",
-            article: "article",
-            domain: "freeInsuranceQuotesUs",
+            vertical: this.config.vertical,
+            subvertical: this.config.subvertical ?? null,
+            article: this.config.articleType,
+            domain: this.config.domain,
             urlSlug: this.urlSlug,
           };
           const articleResp = await this.fetchHandler(this.__query, variables);

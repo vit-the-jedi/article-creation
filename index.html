@@ -53,17 +53,18 @@
     </div>
     <script type="module" src="/init.js"></script>
     <script>
-      console.log(initializeArticles);
       document.addEventListener("DOMContentLoaded", (event) => {
-        const articleConfig = {
-          vertical: "insurance",
-          subvertical: "auto-insurance",
-          articleType: "article",
-          apiUrl:
-            "https://us-west-2.cdn.hygraph.com/content/ckwzg7tk528a001z4e7z0bqi0/master",
-          domain: "free-insurance-quotes.us",
-        };
-        initializeArticles(articleConfig);
+        setTimeout(() => {
+          const articleConfig = {
+            vertical: "insurance",
+            subvertical: "auto-insurance",
+            articleType: "article",
+            apiUrl:
+              "https://us-west-2.cdn.hygraph.com/content/ckwzg7tk528a001z4e7z0bqi0/master",
+            domain: "free-insurance-quotes.us",
+          };
+          window.initializeGrid(articleConfig);
+        }, 500);
       });
     </script>
   </body>

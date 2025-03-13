@@ -1,7 +1,8 @@
 "use strict";
 
 import { ArticleController } from "./base.js";
-import { articleSingle, loader } from "../main.js";
+import { articleSingle, loader, userConfig } from "../init.js";
+
 import {
   scrollToHeader,
   createNode,
@@ -20,16 +21,21 @@ export class ArticleGrid extends ArticleController {
     this.fetch = false;
     this.__effects = {
       fetch: {
+        initConfig: function () {
+          if (!this.config) {
+            this.config = userConfig;
+          }
+        },
         fetchOnInit: async function () {
           if (this.fetch) {
             loader.layout = "grid";
             loader.loading = true;
             const variables = {
               stage: "DRAFT",
-              vertical: "insurance",
-              subvertical: "auto-insurance",
-              article: "article",
-              domain: "freeInsuranceQuotesUs",
+              vertical: this.config.vertical,
+              subvertical: this.config.subvertical ?? null,
+              article: this.config.articleType,
+              domain: this.config.domain,
             };
             const allArticlesResp = await this.fetchHandler(
               this.__query,
