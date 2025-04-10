@@ -173,6 +173,15 @@ export class Article extends ArticleController {
           buildArticleAndAppend(this.article);
           // watchForHistoryChange(this.events.historyChange);
         },
+        //emit an event when the article is created so 3rd party code can listen for it
+        emitArticleCreatedEvent: function () {
+          const event = new CustomEvent("articleCreated", {
+            detail: {
+              article: this.article,
+            },
+          });
+          document.dispatchEvent(event);
+        },
       },
     };
     this.__query = `query getArticleWithRelated($stage: Stage!, $targetedLocation: [Locations!], $domain: Domain!, $urlSlug: String, $vertical: String, $subvertical: String, $article: ArticleTypes!) {
